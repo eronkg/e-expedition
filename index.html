@@ -1,0 +1,2416 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>e-Expedition — Campeonatos</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700;800&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #07080A;
+    --bg-soft: #0C0D10;
+    --surface: rgba(22, 24, 28, 0.72);
+    --surface-solid: #14161A;
+    --surface-2: rgba(32, 35, 42, 0.85);
+    --border: rgba(255,255,255,0.08);
+    --border-strong: rgba(255,255,255,0.14);
+    --text: #F4F5F7;
+    --muted: #9A9DA6;
+    --gold: #C6FF1A;
+    --gold-2: #DFFF66;
+    --violet: #1E1F22;
+    --violet-2: #C6FF1A;
+    --win: #C6FF1A;
+    --loss: #FF4D5E;
+    --radius: 16px;
+    --radius-sm: 12px;
+    --shadow: 0 8px 32px rgba(0,0,0,.35);
+    --shadow-soft: 0 4px 20px rgba(0,0,0,.2);
+    --glass: blur(16px) saturate(1.2);
+  }
+  *{box-sizing:border-box;}
+  html{-webkit-text-size-adjust:100%;overflow-x:hidden;}
+  body{
+    margin:0;color:var(--text);font-family:'Manrope',sans-serif;line-height:1.55;font-size:15px;
+    background-color:var(--bg);
+    background-image:
+      radial-gradient(ellipse 80% 50% at 50% -10%, rgba(198,255,26,.07), transparent 55%),
+      radial-gradient(ellipse 60% 40% at 100% 0%, rgba(80,120,255,.05), transparent 45%),
+      linear-gradient(rgba(7,8,10,.88), rgba(7,8,10,.94)),
+      url('fundo-hero.jpg');
+    background-size: auto, auto, cover, cover;
+    background-position: center, center, center, center;
+    background-repeat: no-repeat, no-repeat, no-repeat, no-repeat;
+    background-attachment: fixed, fixed, fixed, fixed;
+    min-height:100vh;
+  }
+  h1,h2,h3,.display{font-family:'Barlow Condensed',sans-serif;font-weight:700;letter-spacing:0.15px;line-height:1.15;}
+  a{color:inherit;}
+  button{font-family:inherit;cursor:pointer;}
+  input,select,textarea{font-family:inherit;}
+  button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:2px solid var(--gold);outline-offset:2px;}
+  ::-webkit-scrollbar{height:6px;width:6px;}
+  ::-webkit-scrollbar-thumb{background:rgba(255,255,255,.12);border-radius:99px;}
+  ::-webkit-scrollbar-track{background:transparent;}
+
+  .card h3,.card-body h3,.match .slot .name,.podium-spot .nome,
+  .detail-banner h1,.hero h1,.section-title h1{
+    overflow-wrap:anywhere;word-break:break-word;hyphens:auto;
+  }
+  .card-body,.form-box,.match .slot{min-width:0;}
+  .match .slot .name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;min-width:0;}
+  .podium-spot .nome{overflow-wrap:anywhere;word-break:break-word;line-height:1.2;}
+  td,th{overflow-wrap:anywhere;}
+
+  .shell{max-width:1120px;margin:0 auto;padding:0 clamp(16px,4vw,28px) 100px;}
+  .topbar{
+    display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;
+    padding:16px 0 18px;margin-bottom:clamp(18px,3vw,28px);
+    position:sticky;top:0;z-index:40;
+    background:linear-gradient(to bottom, rgba(7,8,10,.92) 60%, transparent);
+    backdrop-filter:blur(12px);
+  }
+  .brand{display:flex;align-items:center;gap:10px;}
+  .brand .mark{
+    width:34px;height:34px;border-radius:10px;flex-shrink:0;
+    background:linear-gradient(145deg,var(--gold-2),var(--gold) 60%,#9AD400);
+    display:flex;align-items:center;justify-content:center;
+    font-family:'Barlow Condensed',sans-serif;font-weight:800;color:#0A0A0A;font-size:17px;
+    box-shadow:0 4px 18px rgba(198,255,26,.28);
+  }
+  .brand .word{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:18px;letter-spacing:0.8px;white-space:nowrap;text-transform:uppercase;opacity:.95;}
+
+  nav{
+    display:flex;gap:2px;background:rgba(255,255,255,.04);padding:4px;border-radius:999px;border:1px solid var(--border);
+    overflow-x:auto;scrollbar-width:none;order:3;flex:1 1 100%;
+    backdrop-filter:var(--glass);
+  }
+  nav::-webkit-scrollbar{display:none;}
+  nav button{
+    background:transparent;border:none;color:var(--muted);padding:8px 16px;border-radius:999px;
+    font-size:13px;font-weight:650;white-space:nowrap;transition:.2s ease;letter-spacing:.2px;
+  }
+  nav button:hover{color:var(--text);background:rgba(255,255,255,.05);}
+  nav button.active{background:rgba(198,255,26,.14);color:var(--gold);font-weight:750;}
+
+  .session{display:flex;align-items:center;gap:10px;font-size:13.5px;color:var(--muted);order:2;margin-left:auto;}
+  .session b{color:var(--text);}
+  .session .user-chip{display:flex;align-items:center;gap:8px;min-width:0;}
+  .session .user-chip b{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:140px;}
+
+  .btn{
+    border:none;border-radius:999px;padding:10px 18px;font-weight:700;font-size:13.5px;
+    transition:.2s ease;letter-spacing:.2px;
+  }
+  .btn-gold{
+    background:linear-gradient(135deg,var(--gold-2),var(--gold));color:#0A0A0A;
+    box-shadow:0 4px 16px rgba(198,255,26,.22);
+  }
+  .btn-gold:hover{filter:brightness(1.08);transform:translateY(-1px);box-shadow:0 6px 22px rgba(198,255,26,.32);}
+  .btn-ghost{
+    background:rgba(255,255,255,.04);border:1px solid var(--border);color:var(--text);
+  }
+  .btn-ghost:hover{background:rgba(255,255,255,.08);border-color:var(--border-strong);}
+  .btn-danger{background:rgba(255,77,94,.08);border:1px solid rgba(255,77,94,.35);color:var(--loss);}
+  .btn-danger:hover{background:rgba(255,77,94,.15);}
+  .btn:disabled{opacity:.4;cursor:not-allowed;transform:none !important;filter:none !important;}
+
+  .hero{padding:clamp(16px,4vw,28px) 0 clamp(12px,2vw,20px);}
+  .hero h1{font-size:clamp(32px,6vw,52px);line-height:1.02;margin:0 0 12px;
+    background:linear-gradient(135deg,var(--text) 35%,var(--gold-2));
+    -webkit-background-clip:text;background-clip:text;color:transparent;}
+  .hero p{color:var(--muted);max-width:520px;font-size:clamp(14px,2vw,15.5px);margin:0;line-height:1.6;}
+
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(270px,100%),1fr));gap:clamp(14px,2.5vw,20px);}
+  .card{
+    background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);
+    padding:0;transition:.25s ease;overflow:hidden;
+    backdrop-filter:var(--glass);box-shadow:var(--shadow-soft);
+  }
+  .card:hover{
+    transform:translateY(-4px);
+    box-shadow:0 16px 40px rgba(0,0,0,.4), 0 0 0 1px rgba(198,255,26,.18);
+    border-color:rgba(198,255,26,.22);
+  }
+  .card h3{margin:0 0 6px;font-size:21px;line-height:1.2;overflow-wrap:anywhere;font-weight:750;}
+  .tag{
+    display:inline-block;font-size:10.5px;font-weight:800;color:#0A0A0A;background:var(--gold);
+    padding:4px 10px;border-radius:999px;margin-bottom:10px;letter-spacing:.5px;text-transform:uppercase;
+  }
+  .tag.status-aberto{background:var(--gold);}
+  .tag.status-andamento{background:#FFB020;color:#1A1000;}
+  .tag.status-finalizado{background:rgba(255,255,255,.14);color:var(--text);}
+  .muted{color:var(--muted);font-size:13.5px;line-height:1.45;}
+  .card .row{display:flex;justify-content:space-between;align-items:center;margin-top:14px;gap:10px;flex-wrap:wrap;}
+  .card-body{padding:16px 18px 18px;}
+
+  .field{margin-bottom:14px;}
+  .field label{display:block;font-size:12.5px;color:var(--muted);margin-bottom:6px;font-weight:600;letter-spacing:.2px;}
+  .field input,.field select,textarea{
+    width:100%;background:rgba(255,255,255,.04);border:1px solid var(--border);color:var(--text);
+    padding:11px 14px;border-radius:var(--radius-sm);font-size:14.5px;transition:.2s;
+  }
+  .field input:focus,.field select:focus,textarea:focus{border-color:rgba(198,255,26,.45);background:rgba(255,255,255,.06);}
+  .form-box{
+    background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);
+    padding:22px;flex:1 1 320px;max-width:440px;
+    backdrop-filter:var(--glass);box-shadow:var(--shadow-soft);
+  }
+  .form-row{display:flex;gap:24px;flex-wrap:wrap;}
+
+  .bracket{display:flex;gap:clamp(18px,3vw,34px);overflow-x:auto;padding:12px 2px 24px;-webkit-overflow-scrolling:touch;}
+  .round-col{display:flex;flex-direction:column;justify-content:space-around;min-width:200px;gap:20px;}
+  .round-title{font-family:'Barlow Condensed',sans-serif;font-weight:700;color:var(--muted);font-size:14px;margin-bottom:6px;letter-spacing:.4px;text-transform:uppercase;}
+  .match{
+    background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);
+    overflow:hidden;transition:.2s;backdrop-filter:var(--glass);
+  }
+  .match:hover{border-color:var(--border-strong);}
+  .match .slot{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:9px 12px;font-size:13.5px;border-bottom:1px solid var(--border);}
+  .match .slot:last-child{border-bottom:none;}
+  .match .slot.win{color:var(--win);font-weight:700;}
+  .match .slot.bye{color:var(--muted);font-style:italic;}
+  .match .slot input{width:38px;background:rgba(0,0,0,.25);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:4px;font-size:13px;text-align:center;}
+
+  .table-wrap{
+    overflow-x:auto;border:1px solid var(--border);border-radius:var(--radius);
+    background:var(--surface);backdrop-filter:var(--glass);
+  }
+  table{width:100%;border-collapse:collapse;min-width:420px;}
+  th,td{text-align:left;padding:12px 16px;border-bottom:1px solid var(--border);font-size:14px;white-space:nowrap;}
+  th{color:var(--muted);font-weight:700;font-size:11.5px;text-transform:uppercase;letter-spacing:.45px;}
+  tr:last-child td{border-bottom:none;}
+  tbody tr:hover{background:rgba(255,255,255,.03);}
+
+  .hero-banner{
+    position:relative;overflow:hidden;
+    border-radius:var(--radius);
+    padding:clamp(28px,5.5vw,48px) clamp(20px,4vw,36px);
+    background:
+      radial-gradient(ellipse 70% 80% at 90% 20%, rgba(198,255,26,.14), transparent 50%),
+      radial-gradient(ellipse 50% 60% at 10% 90%, rgba(40,60,20,.3), transparent 55%),
+      linear-gradient(135deg, rgba(18,22,14,.9) 0%, rgba(12,14,12,.85) 50%, rgba(16,22,12,.9) 100%);
+    border:1px solid var(--border);
+    margin-bottom:clamp(22px,4vw,32px);
+    box-shadow:var(--shadow-soft);
+    backdrop-filter:var(--glass);
+  }
+  .hero-banner .inner{position:relative;z-index:1;}
+  .hero-banner h1{
+    color:#fff;-webkit-text-fill-color:#fff;background:none;
+    font-size:clamp(30px,5.5vw,48px);margin:0 0 12px;line-height:1.05;font-weight:750;
+  }
+  .hero-banner p{color:rgba(255,255,255,.72);max-width:520px;font-size:clamp(14px,2vw,15.5px);margin:0 0 22px;line-height:1.55;}
+  .hero-stats{display:flex;gap:clamp(16px,3.5vw,28px);flex-wrap:wrap;}
+  .hero-stats .stat{
+    background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);
+    border-radius:14px;padding:12px 16px;min-width:88px;
+  }
+  .hero-stats .stat b{display:block;font-family:'Barlow Condensed',sans-serif;font-size:28px;color:#fff;line-height:1;font-weight:750;}
+  .hero-stats .stat span{font-size:11px;color:rgba(255,255,255,.6);text-transform:uppercase;letter-spacing:.4px;margin-top:4px;display:block;}
+
+  .banner{
+    height:96px;position:relative;display:flex;align-items:flex-end;justify-content:flex-end;
+    padding:12px 14px;overflow:hidden;
+  }
+  .banner::after{content:'';position:absolute;inset:0;background-image:
+    radial-gradient(circle at 15% 120%, rgba(255,255,255,.18), transparent 50%),
+    radial-gradient(circle at 95% -10%, rgba(255,255,255,.12), transparent 40%);
+    opacity:.9;}
+  .banner .game-icon{
+    position:relative;width:44px;height:44px;border-radius:12px;
+    background:rgba(255,255,255,.16);backdrop-filter:blur(6px);
+    display:flex;align-items:center;justify-content:center;
+    font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:15px;color:#fff;
+    letter-spacing:0.4px;box-shadow:0 4px 12px rgba(0,0,0,.2);
+    border:1px solid rgba(255,255,255,.12);
+  }
+  .banner-sm{height:56px;}
+  .banner-sm .game-icon{width:32px;height:32px;font-size:12px;border-radius:9px;}
+
+  .detail-banner{
+    position:relative;overflow:hidden;border-radius:var(--radius);
+    padding:26px clamp(18px,4vw,32px);margin-bottom:22px;color:#fff;
+    box-shadow:var(--shadow-soft);border:1px solid rgba(255,255,255,.1);
+  }
+  .detail-banner::after{content:'';position:absolute;inset:0;background-image:
+    radial-gradient(circle at 92% -5%, rgba(255,255,255,.18), transparent 42%),
+    radial-gradient(circle at 5% 110%, rgba(0,0,0,.25), transparent 50%);}
+  .detail-banner .inner{position:relative;z-index:1;}
+  .detail-banner .tag{background:rgba(255,255,255,.2);color:#fff;}
+  .detail-banner h1{color:#fff;-webkit-text-fill-color:#fff;background:none;font-size:clamp(26px,5vw,40px);margin:6px 0;line-height:1.1;}
+  .detail-banner .muted{color:rgba(255,255,255,.78);}
+  .detail-banner .game-icon-lg{
+    position:absolute;right:20px;bottom:16px;width:64px;height:64px;border-radius:16px;
+    background:rgba(255,255,255,.12);display:flex;align-items:center;justify-content:center;
+    font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:22px;color:#fff;
+    letter-spacing:.8px;border:1px solid rgba(255,255,255,.12);
+  }
+
+  .avatar,.avatar-img{
+    width:32px;height:32px;border-radius:50%;object-fit:cover;flex-shrink:0;
+    background:var(--surface-solid);border:2px solid rgba(255,255,255,.12);
+  }
+  .avatar-initials{
+    width:32px;height:32px;border-radius:50%;flex-shrink:0;
+    background:linear-gradient(145deg,var(--gold-2),var(--gold));
+    color:#0A0A0A;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:13px;
+    display:inline-flex;align-items:center;justify-content:center;letter-spacing:0.3px;
+    border:2px solid transparent;
+  }
+  .avatar-lg,.avatar-img.avatar-lg{width:76px;height:76px;border-width:3px;}
+  .avatar-initials.avatar-lg{width:76px;height:76px;font-size:26px;}
+
+  .empty{
+    padding:48px 24px;text-align:center;color:var(--muted);
+    border:1px dashed var(--border-strong);border-radius:var(--radius);
+    background:rgba(255,255,255,.02);
+  }
+
+  .toast{
+    position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(8px);
+    background:rgba(22,24,28,.94);border:1px solid var(--border-strong);
+    padding:12px 20px;border-radius:999px;font-size:13.5px;font-weight:600;
+    box-shadow:0 12px 40px rgba(0,0,0,.45);opacity:0;pointer-events:none;
+    transition:opacity .25s, transform .25s;max-width:calc(100vw - 32px);text-align:center;
+    backdrop-filter:blur(12px);
+  }
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+  .section-title{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin:4px 0 18px;flex-wrap:wrap;}
+  .section-title h1{letter-spacing:.2px;}
+  .tabs-inline{display:flex;gap:8px;margin-bottom:18px;flex-wrap:wrap;}
+  .tabs-inline button{
+    background:rgba(255,255,255,.04);border:1px solid var(--border);color:var(--muted);
+    padding:7px 14px;border-radius:999px;font-size:13px;font-weight:600;transition:.2s;
+  }
+  .tabs-inline button:hover{color:var(--text);border-color:var(--border-strong);}
+  .tabs-inline button.active{background:var(--gold);color:#0A0A0A;border-color:var(--gold);font-weight:800;}
+  .player-list{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;}
+  .player-list span{background:rgba(255,255,255,.06);border-radius:999px;padding:4px 10px;font-size:12.5px;color:var(--muted);}
+
+  @keyframes cardIn{ from{opacity:0;transform:translateY(12px);} to{opacity:1;transform:translateY(0);} }
+  .card{animation:cardIn .4s ease both;}
+  @keyframes fadeUp{ from{opacity:0;transform:translateY(8px);} to{opacity:1;transform:translateY(0);} }
+  .hero-banner,.detail-banner{animation:fadeUp .45s ease both;}
+
+  .ticker-wrap{
+    overflow:hidden;background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:999px;
+    margin:0 0 clamp(16px,3vw,24px);padding:8px 0;white-space:nowrap;display:none;
+    backdrop-filter:var(--glass);
+  }
+  .ticker-track{display:inline-flex;gap:32px;animation:ticker-scroll 26s linear infinite;padding-left:20px;}
+  .ticker-wrap:hover .ticker-track{animation-play-state:paused;}
+  .ticker-track span.ticker-item{font-size:12px;font-weight:700;color:var(--gold);letter-spacing:.25px;display:inline-flex;align-items:center;gap:8px;}
+  .ticker-track span.ticker-dot{color:rgba(255,255,255,.2);}
+  @keyframes ticker-scroll{ from{transform:translateX(0);} to{transform:translateX(-50%);} }
+
+  .pair{position:relative;display:flex;flex-direction:column;justify-content:space-between;gap:20px;}
+  .pair::after{
+    content:'';position:absolute;right:-16px;top:36px;bottom:36px;width:16px;
+    border-top:1.5px solid rgba(198,255,26,.3);border-bottom:1.5px solid rgba(198,255,26,.3);
+    border-right:1.5px solid rgba(198,255,26,.3);border-radius:0 8px 8px 0;
+  }
+  .match.decidido{box-shadow:inset 0 0 0 1px rgba(198,255,26,.25);}
+
+  .podium{display:flex;align-items:flex-end;gap:14px;margin-bottom:28px;}
+  .podium-spot{
+    flex:1;min-width:0;background:var(--surface);border:1px solid var(--border);
+    border-radius:var(--radius);padding:18px 14px;text-align:center;position:relative;
+    animation:fadeUp .45s ease both;backdrop-filter:var(--glass);
+  }
+  .podium-spot .medal{
+    width:38px;height:38px;border-radius:50%;margin:0 auto 10px;
+    display:flex;align-items:center;justify-content:center;
+    font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:16px;color:#0A0A0A;
+  }
+  .podium-spot.first .medal{background:linear-gradient(145deg,#FFE566,#C8A800);box-shadow:0 4px 14px rgba(200,168,0,.35);}
+  .podium-spot.second .medal{background:linear-gradient(145deg,#EEF1F5,#A4ACB4);box-shadow:0 4px 14px rgba(160,168,176,.25);}
+  .podium-spot.third .medal{background:linear-gradient(145deg,#ECAA7A,#B06A30);box-shadow:0 4px 14px rgba(176,106,48,.28);}
+  .podium-spot .nome{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:17px;line-height:1.2;}
+  .podium-spot .vit{color:var(--gold);font-weight:800;font-size:12.5px;margin-top:6px;}
+  .podium-spot.first{padding-top:28px;border-color:rgba(198,255,26,.28);box-shadow:0 0 0 1px rgba(198,255,26,.12),var(--shadow-soft);order:2;}
+  .podium-spot.second{order:1;padding-top:14px;}
+  .podium-spot.third{order:3;padding-top:10px;}
+
+  .nivel-badge{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:800;padding:4px 10px;border-radius:999px;text-transform:uppercase;letter-spacing:.3px;}
+  .nivel-bronze{background:rgba(240,178,122,.12);color:#F0B27A;}
+  .nivel-prata{background:rgba(216,220,226,.1);color:#D8DCE2;}
+  .nivel-ouro{background:rgba(255,224,102,.12);color:#FFE066;}
+  .nivel-diamante{background:rgba(102,240,255,.1);color:#66F0FF;}
+
+  @media (max-width:640px){
+    .topbar{gap:10px;padding:12px 0 14px;}
+    .brand{order:1;}
+    .session{order:2;margin-left:0;width:auto;}
+    nav{order:3;}
+    .btn{padding:9px 14px;font-size:13px;}
+    .card-body{padding:14px 15px 16px;}
+    .form-box{padding:18px;}
+    .session .user-chip b{max-width:90px;}
+    .hero-banner{border-radius:14px;padding:24px 18px;}
+    .podium{gap:10px;}
+  }
+
+  /* ---- admin panel ---- */
+  .admin-nav{
+    display:flex;gap:6px;flex-wrap:wrap;margin-bottom:22px;
+    background:rgba(255,255,255,.03);border:1px solid var(--border);
+    border-radius:999px;padding:5px;width:fit-content;max-width:100%;
+  }
+  .admin-nav button{
+    background:transparent;border:none;color:var(--muted);padding:8px 16px;
+    border-radius:999px;font-size:13px;font-weight:650;cursor:pointer;transition:.2s;
+  }
+  .admin-nav button:hover{color:var(--text);}
+  .admin-nav button.active{background:rgba(198,255,26,.14);color:var(--gold);font-weight:750;}
+
+  .admin-stats{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:22px;}
+  .admin-stat{
+    background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);
+    padding:14px 18px;min-width:110px;backdrop-filter:var(--glass);
+  }
+  .admin-stat b{display:block;font-family:'Barlow Condensed',sans-serif;font-size:26px;line-height:1;font-weight:750;}
+  .admin-stat span{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;}
+
+  .wizard-steps{display:flex;align-items:center;gap:0;margin-bottom:22px;flex-wrap:wrap;}
+  .wizard-step{display:flex;align-items:center;gap:8px;color:var(--muted);font-size:13px;font-weight:600;}
+  .wizard-step .num{
+    width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+    background:rgba(255,255,255,.06);border:1px solid var(--border);font-size:12px;font-weight:800;
+  }
+  .wizard-step.active{color:var(--text);}
+  .wizard-step.active .num{background:var(--gold);color:#0A0A0A;border-color:var(--gold);}
+  .wizard-step.done{color:var(--gold);}
+  .wizard-step.done .num{background:rgba(198,255,26,.2);color:var(--gold);border-color:rgba(198,255,26,.35);}
+  .wizard-line{width:28px;height:2px;background:var(--border);margin:0 6px;}
+  .wizard-line.done{background:rgba(198,255,26,.4);}
+  .wizard-nav{display:flex;justify-content:space-between;gap:12px;margin-top:20px;flex-wrap:wrap;}
+
+  .format-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;}
+  .format-card{
+    text-align:left;background:rgba(255,255,255,.03);border:1px solid var(--border);
+    border-radius:var(--radius-sm);padding:16px;cursor:pointer;transition:.2s;
+    display:flex;flex-direction:column;gap:6px;color:var(--text);
+  }
+  .format-card:hover{border-color:var(--border-strong);background:rgba(255,255,255,.05);}
+  .format-card.active{border-color:rgba(198,255,26,.45);background:rgba(198,255,26,.08);box-shadow:0 0 0 1px rgba(198,255,26,.15);}
+  .format-icon{
+    width:36px;height:36px;border-radius:10px;background:rgba(198,255,26,.12);color:var(--gold);
+    display:flex;align-items:center;justify-content:center;font-family:'Barlow Condensed',sans-serif;
+    font-weight:800;font-size:14px;margin-bottom:4px;
+  }
+  .format-card strong{font-size:15px;}
+  .format-card .muted{font-size:12.5px;line-height:1.4;}
+
+  .check-row{display:flex;align-items:center;gap:10px;font-size:14px;color:var(--text);cursor:pointer;margin:8px 0;}
+  .check-row input{width:16px;height:16px;accent-color:var(--gold);}
+
+  .pick-list{display:flex;flex-direction:column;gap:6px;max-height:220px;overflow-y:auto;margin-bottom:8px;}
+  .pick-item{
+    display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;
+    background:rgba(255,255,255,.03);border:1px solid var(--border);cursor:pointer;font-size:14px;
+  }
+  .pick-item.on{border-color:rgba(198,255,26,.35);background:rgba(198,255,26,.08);}
+  .pick-item input{accent-color:var(--gold);}
+
+  .review-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:12px;}
+  .review-grid > div{display:flex;flex-direction:column;gap:2px;}
+  .review-grid b{font-size:15px;}
+  @media (max-width:560px){
+    .review-grid{grid-template-columns:1fr;}
+    .admin-nav{width:100%;}
+  }
+
+
+  /* ========== GLOBAL EFFECTS & MOTION ========== */
+  html{scroll-behavior:smooth;}
+  @media (prefers-reduced-motion: reduce){
+    html{scroll-behavior:auto;}
+    *,*::before,*::after{
+      animation-duration:.01ms !important;
+      animation-iteration-count:1 !important;
+      transition-duration:.01ms !important;
+    }
+  }
+
+  /* smooth view swap */
+  #view{
+    animation:viewIn .38s cubic-bezier(.22,1,.36,1) both;
+  }
+  @keyframes viewIn{
+    from{opacity:0;transform:translateY(14px) scale(.992);}
+    to{opacity:1;transform:none;}
+  }
+
+  /* ambient floating orbs */
+  body::before,body::after{
+    content:'';position:fixed;pointer-events:none;z-index:0;border-radius:50%;
+    filter:blur(80px);opacity:.45;
+  }
+  body::before{
+    width:420px;height:420px;top:-120px;left:-80px;
+    background:radial-gradient(circle, rgba(198,255,26,.12), transparent 70%);
+    animation:orbFloat 18s ease-in-out infinite alternate;
+  }
+  body::after{
+    width:380px;height:380px;bottom:-100px;right:-60px;
+    background:radial-gradient(circle, rgba(90,140,255,.1), transparent 70%);
+    animation:orbFloat 22s ease-in-out infinite alternate-reverse;
+  }
+  @keyframes orbFloat{
+    from{transform:translate(0,0) scale(1);}
+    to{transform:translate(40px,30px) scale(1.12);}
+  }
+  .shell,.toast{position:relative;z-index:1;}
+  .topbar{z-index:40;}
+
+  /* improved card motion */
+  @keyframes cardIn{
+    from{opacity:0;transform:translateY(18px) scale(.97);}
+    to{opacity:1;transform:none;}
+  }
+  .card{
+    animation:cardIn .5s cubic-bezier(.22,1,.36,1) both;
+    transition:transform .35s cubic-bezier(.22,1,.36,1), box-shadow .35s ease, border-color .3s ease, background .3s ease;
+  }
+  .card:hover{
+    transform:translateY(-6px) scale(1.01);
+    box-shadow:0 20px 48px rgba(0,0,0,.45), 0 0 0 1px rgba(198,255,26,.2), 0 0 40px rgba(198,255,26,.06);
+  }
+  .card:active{transform:translateY(-2px) scale(.995);}
+
+  /* banner shine on hover */
+  .card .banner{transition:filter .35s ease;}
+  .card:hover .banner{filter:brightness(1.08) saturate(1.1);}
+  .banner .game-icon{
+    transition:transform .4s cubic-bezier(.22,1,.36,1), background .3s ease;
+  }
+  .card:hover .banner .game-icon{transform:scale(1.08) rotate(-3deg);}
+
+  /* buttons — press + glow */
+  .btn{
+    position:relative;overflow:hidden;
+    transition:transform .2s cubic-bezier(.22,1,.36,1), box-shadow .25s ease, filter .2s ease, background .2s ease, border-color .2s ease;
+  }
+  .btn::after{
+    content:'';position:absolute;inset:0;background:linear-gradient(120deg, transparent 30%, rgba(255,255,255,.18) 50%, transparent 70%);
+    transform:translateX(-120%);transition:transform .55s ease;pointer-events:none;
+  }
+  .btn:hover::after{transform:translateX(120%);}
+  .btn:active{transform:scale(.96);}
+  .btn-gold:hover{
+    filter:brightness(1.1);
+    box-shadow:0 8px 28px rgba(198,255,26,.38), 0 0 0 1px rgba(198,255,26,.2);
+  }
+  .btn-ghost:hover{box-shadow:0 4px 16px rgba(0,0,0,.25);}
+
+  /* nav pills */
+  nav button, .admin-nav button, .tabs-inline button{
+    transition:color .2s ease, background .25s cubic-bezier(.22,1,.36,1), transform .2s ease, box-shadow .25s ease;
+  }
+  nav button:hover, .admin-nav button:hover{transform:translateY(-1px);}
+  nav button.active, .admin-nav button.active{
+    box-shadow:0 2px 12px rgba(198,255,26,.15);
+  }
+  nav button:active, .admin-nav button:active{transform:scale(.96);}
+
+  /* topbar brand pulse */
+  .brand .mark{
+    transition:transform .35s cubic-bezier(.22,1,.36,1), box-shadow .35s ease;
+  }
+  .brand:hover .mark{
+    transform:scale(1.08) rotate(-4deg);
+    box-shadow:0 6px 24px rgba(198,255,26,.4);
+  }
+
+  /* inputs focus glow */
+  .field input,.field select,textarea{
+    transition:border-color .25s ease, background .25s ease, box-shadow .25s ease, transform .2s ease;
+  }
+  .field input:focus,.field select:focus,textarea:focus{
+    box-shadow:0 0 0 3px rgba(198,255,26,.12);
+    transform:translateY(-1px);
+  }
+
+  /* hero / detail banners */
+  @keyframes fadeUp{
+    from{opacity:0;transform:translateY(16px);}
+    to{opacity:1;transform:none;}
+  }
+  @keyframes scaleIn{
+    from{opacity:0;transform:scale(.94);}
+    to{opacity:1;transform:none;}
+  }
+  .hero-banner,.detail-banner{
+    animation:fadeUp .55s cubic-bezier(.22,1,.36,1) both;
+    transition:box-shadow .4s ease, border-color .3s ease;
+  }
+  .hero-banner:hover,.detail-banner:hover{
+    box-shadow:0 12px 40px rgba(0,0,0,.35), 0 0 0 1px rgba(198,255,26,.12);
+  }
+  .hero-stats .stat{
+    transition:transform .3s cubic-bezier(.22,1,.36,1), background .3s ease, border-color .3s ease;
+    animation:scaleIn .5s cubic-bezier(.22,1,.36,1) both;
+  }
+  .hero-stats .stat:nth-child(1){animation-delay:.05s;}
+  .hero-stats .stat:nth-child(2){animation-delay:.1s;}
+  .hero-stats .stat:nth-child(3){animation-delay:.15s;}
+  .hero-stats .stat:nth-child(4){animation-delay:.2s;}
+  .hero-stats .stat:hover{
+    transform:translateY(-3px);
+    background:rgba(255,255,255,.08);
+    border-color:rgba(198,255,26,.25);
+  }
+
+  /* tags pop */
+  .tag{
+    transition:transform .25s ease, box-shadow .25s ease;
+  }
+  .card:hover .tag{transform:scale(1.04);}
+
+  /* match cards */
+  .match{
+    transition:transform .25s ease, border-color .25s ease, box-shadow .3s ease;
+  }
+  .match:hover{
+    transform:translateY(-2px);
+    box-shadow:0 8px 24px rgba(0,0,0,.3);
+  }
+  .match.decidido{
+    animation:matchDone .45s cubic-bezier(.22,1,.36,1) both;
+  }
+  @keyframes matchDone{
+    from{box-shadow:0 0 0 0 rgba(198,255,26,.4);}
+    to{box-shadow:inset 0 0 0 1px rgba(198,255,26,.25);}
+  }
+  .match .slot.win{
+    animation:winFlash .5s ease both;
+  }
+  @keyframes winFlash{
+    0%{background:rgba(198,255,26,.2);}
+    100%{background:transparent;}
+  }
+
+  /* tables */
+  tbody tr{
+    transition:background .2s ease, transform .2s ease;
+  }
+  tbody tr:hover{background:rgba(255,255,255,.045);}
+
+  /* podium */
+  .podium-spot{
+    transition:transform .35s cubic-bezier(.22,1,.36,1), box-shadow .35s ease, border-color .3s ease;
+  }
+  .podium-spot:hover{transform:translateY(-6px);}
+  .podium-spot.first:hover{box-shadow:0 0 0 1px rgba(198,255,26,.25), 0 16px 40px rgba(198,255,26,.12);}
+  .podium-spot .medal{
+    transition:transform .4s cubic-bezier(.22,1,.36,1);
+  }
+  .podium-spot:hover .medal{transform:scale(1.12) rotate(-8deg);}
+
+  /* form boxes */
+  .form-box{
+    animation:fadeUp .45s cubic-bezier(.22,1,.36,1) both;
+    transition:box-shadow .3s ease, border-color .3s ease, transform .3s ease;
+  }
+  .form-box:focus-within{
+    border-color:rgba(198,255,26,.22);
+    box-shadow:0 8px 32px rgba(0,0,0,.3), 0 0 0 1px rgba(198,255,26,.1);
+  }
+
+  /* format cards */
+  .format-card{
+    transition:transform .3s cubic-bezier(.22,1,.36,1), border-color .25s ease, background .25s ease, box-shadow .3s ease;
+  }
+  .format-card:hover{transform:translateY(-4px);}
+  .format-card.active{
+    transform:translateY(-2px);
+    box-shadow:0 8px 28px rgba(198,255,26,.12);
+  }
+  .format-icon{transition:transform .35s cubic-bezier(.22,1,.36,1);}
+  .format-card:hover .format-icon,.format-card.active .format-icon{transform:scale(1.1);}
+
+  /* wizard steps */
+  .wizard-step .num{transition:transform .3s ease, background .3s ease, color .3s ease, border-color .3s ease;}
+  .wizard-step.active .num{animation:pulseGold 1.6s ease infinite;}
+  @keyframes pulseGold{
+    0%,100%{box-shadow:0 0 0 0 rgba(198,255,26,.35);}
+    50%{box-shadow:0 0 0 6px rgba(198,255,26,0);}
+  }
+  .wizard-line{transition:background .4s ease, width .3s ease;}
+
+  /* pick list */
+  .pick-item{transition:background .2s ease, border-color .2s ease, transform .2s ease;}
+  .pick-item:hover{transform:translateX(3px);}
+  .pick-item.on{box-shadow:0 0 0 1px rgba(198,255,26,.15);}
+
+  /* avatar */
+  .avatar-img,.avatar-initials{
+    transition:transform .3s cubic-bezier(.22,1,.36,1), box-shadow .3s ease;
+  }
+  .user-chip:hover .avatar-img,
+  .user-chip:hover .avatar-initials{
+    transform:scale(1.08);
+    box-shadow:0 0 0 2px rgba(198,255,26,.35);
+  }
+
+  /* toast upgrade */
+  .toast{
+    transform:translateX(-50%) translateY(16px) scale(.96);
+    transition:opacity .3s cubic-bezier(.22,1,.36,1), transform .3s cubic-bezier(.22,1,.36,1);
+  }
+  .toast.show{
+    opacity:1;
+    transform:translateX(-50%) translateY(0) scale(1);
+  }
+
+  /* empty state */
+  .empty{
+    animation:fadeUp .5s cubic-bezier(.22,1,.36,1) both;
+    transition:border-color .3s ease, background .3s ease;
+  }
+  .empty:hover{border-color:rgba(198,255,26,.2);background:rgba(255,255,255,.03);}
+
+  /* ticker */
+  .ticker-wrap{
+    transition:opacity .3s ease, transform .3s ease;
+    animation:fadeUp .4s ease both;
+  }
+  .ticker-track span.ticker-item{
+    transition:color .2s ease;
+  }
+
+  /* section titles */
+  .section-title h1{
+    animation:fadeUp .4s cubic-bezier(.22,1,.36,1) both;
+  }
+
+  /* scroll reveal utility */
+  .reveal{
+    opacity:0;transform:translateY(20px);
+    transition:opacity .55s cubic-bezier(.22,1,.36,1), transform .55s cubic-bezier(.22,1,.36,1);
+  }
+  .reveal.in{
+    opacity:1;transform:none;
+  }
+
+  /* admin stats */
+  .admin-stat{
+    transition:transform .3s cubic-bezier(.22,1,.36,1), border-color .25s ease, box-shadow .3s ease;
+    animation:scaleIn .45s cubic-bezier(.22,1,.36,1) both;
+  }
+  .admin-stat:nth-child(1){animation-delay:.04s;}
+  .admin-stat:nth-child(2){animation-delay:.08s;}
+  .admin-stat:nth-child(3){animation-delay:.12s;}
+  .admin-stat:nth-child(4){animation-delay:.16s;}
+  .admin-stat:nth-child(5){animation-delay:.2s;}
+  .admin-stat:hover{
+    transform:translateY(-4px);
+    border-color:rgba(198,255,26,.25);
+    box-shadow:0 8px 24px rgba(0,0,0,.3);
+  }
+
+  /* nivel badges */
+  .nivel-badge{transition:transform .2s ease, box-shadow .2s ease;}
+  .nivel-badge:hover{transform:scale(1.06);}
+
+  /* sticky topbar glass strengthen on scroll */
+  .topbar.scrolled{
+    background:rgba(7,8,10,.85);
+    backdrop-filter:blur(18px) saturate(1.3);
+    border-bottom:1px solid var(--border);
+    box-shadow:0 8px 32px rgba(0,0,0,.35);
+  }
+
+  /* smooth image load */
+  .avatar-img{opacity:0;animation:imgFade .4s ease forwards;}
+  @keyframes imgFade{to{opacity:1;}}
+
+  /* bracket connectors subtle glow */
+  .pair::after{
+    transition:border-color .3s ease;
+  }
+  .bracket:hover .pair::after{
+    border-color:rgba(198,255,26,.5);
+  }
+
+  /* custom selection */
+  ::selection{background:rgba(198,255,26,.3);color:#fff;}
+
+  /* scrollbar thumb hover */
+  ::-webkit-scrollbar-thumb:hover{background:rgba(198,255,26,.35);}
+
+</style>
+</head>
+<body>
+<div class="shell">
+  <div class="topbar">
+    <div class="brand"><div class="mark">e</div><div class="word">e-Expedition</div></div>
+    <nav id="mainNav"></nav>
+    <div class="session" id="sessionBox"></div>
+  </div>
+  <div class="ticker-wrap" id="tickerWrap"></div>
+  <div id="view"></div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" onerror="this.onerror=null;this.src='https://unpkg.com/@supabase/supabase-js@2';"></script>
+<script>
+/* ================= supabase ================= */
+const SUPABASE_URL = 'https://numvmwpcbmjwyezezpsy.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_9OinOVOKllBA_e_U5sU5_Q_PPXi2osU';
+let db;
+
+function toast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg;
+  t.classList.remove('show');
+  void t.offsetWidth; // restart anim
+  t.classList.add('show');
+  clearTimeout(window._tt);
+  window._tt=setTimeout(()=>t.classList.remove('show'),2400);
+}
+
+function restartViewAnim(){
+  const view = document.getElementById('view');
+  if(!view) return;
+  view.style.animation = 'none';
+  void view.offsetWidth;
+  view.style.animation = '';
+}
+
+function setupScrollEffects(){
+  const topbar = document.querySelector('.topbar');
+  if(!topbar || topbar._scrollBound) return;
+  topbar._scrollBound = true;
+  const onScroll = ()=>{
+    if(window.scrollY > 12) topbar.classList.add('scrolled');
+    else topbar.classList.remove('scrolled');
+  };
+  window.addEventListener('scroll', onScroll, {passive:true});
+  onScroll();
+}
+
+function staggerCards(container){
+  if(!container) return;
+  const cards = container.querySelectorAll('.card, .admin-stat, .podium-spot, .format-card, .match');
+  cards.forEach((el,i)=>{
+    el.style.animationDelay = Math.min(i * 0.05, 0.45) + 's';
+  });
+}
+
+function h(html){
+  const d=document.createElement('div');
+  d.innerHTML=html.trim();
+  return d.children.length===1 ? d.firstElementChild : d;
+}
+function animateCounters(container){
+  container.querySelectorAll('[data-count]').forEach(el=>{
+    const target = parseInt(el.dataset.count,10)||0;
+    const start = performance.now();
+    const duration = 900;
+    function step(now){
+      const t = Math.min((now-start)/duration,1);
+      // easeOutExpo
+      const p = t===1 ? 1 : 1 - Math.pow(2, -10 * t);
+      el.textContent = Math.round(p*target);
+      if(t<1) requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
+  });
+}
+function renderTicker(){
+  const wrap = document.getElementById('tickerWrap');
+  if(!wrap) return;
+  const items = [];
+  state.torneios.forEach(t=>{
+    if(t.status!=='andamento' || !t.partidas) return;
+    t.partidas.forEach(m=>{
+      if(m.timeA && m.timeB && !m.vencedor){
+        items.push(`${m.timeA.nome} vs ${m.timeB.nome} — ${t.nome}`);
+      }
+    });
+  });
+  if(items.length===0){ wrap.style.display='none'; wrap.innerHTML=''; return; }
+  wrap.style.display='block';
+  const itemsHtml = items.map(i=>`<span class="ticker-item">${i}</span>`).join('<span class="ticker-dot">•</span>');
+  wrap.innerHTML = `<div class="ticker-track">${itemsHtml}<span class="ticker-dot">•</span>${itemsHtml}</div>`;
+}
+
+/* ================= app state ================= */
+const state = {
+  tab: 'torneios',
+  user: null,        // {id, email, nome, role}
+  torneios: [],
+  times: [],
+  torneioAtivo: null,
+  adminTab: 'dashboard', // dashboard | criar | lista | participantes
+  wizard: null, // multi-step create state
+};
+
+const JOGOS = ['FIFA','League of Legends','Valorant','CS2','Free Fire','Outro'];
+
+const GAME_THEME = {
+  'FIFA':               {grad:'linear-gradient(135deg,#12A150 0%,#0A5C33 60%,#063D22 100%)', code:'FIFA'},
+  'League of Legends':  {grad:'linear-gradient(135deg,#5B3CE0 0%,#3B2394 60%,#1B1440 100%)', code:'LoL'},
+  'Valorant':           {grad:'linear-gradient(135deg,#E23A5A 0%,#A31E3A 60%,#4A0E1C 100%)', code:'VAL'},
+  'CS2':                {grad:'linear-gradient(135deg,#5B7285 0%,#33465A 60%,#141C24 100%)', code:'CS2'},
+  'Free Fire':          {grad:'linear-gradient(135deg,#F5920E 0%,#C9560A 60%,#6B2A0A 100%)', code:'FF'},
+  'Outro':              {grad:'linear-gradient(135deg,#9B82FF 0%,#6C4CD9 60%,#241C4A 100%)', code:'OUT'}
+};
+function gameTheme(jogo){ return GAME_THEME[jogo] || GAME_THEME['Outro']; }
+
+function initialsFromName(nome){
+  if(!nome) return '?';
+  const parts = String(nome).trim().split(/\s+/).filter(Boolean);
+  if(parts.length>=2) return (parts[0][0]+parts[1][0]).toUpperCase();
+  return String(nome).slice(0,2).toUpperCase();
+}
+function isPhotoAvatar(av){
+  return av && (av.startsWith('http') || av.startsWith('data:image'));
+}
+function avatarHTML(userOrNome, sizeClass=''){
+  const nome = typeof userOrNome === 'string' ? userOrNome : (userOrNome && userOrNome.nome) || '';
+  const av = typeof userOrNome === 'object' && userOrNome ? userOrNome.avatar : null;
+  if(isPhotoAvatar(av)){
+    return `<img class="avatar-img ${sizeClass}" src="${av}" alt="" onerror="this.style.display='none';this.nextElementSibling&&(this.nextElementSibling.style.display='inline-flex')"/><span class="avatar-initials ${sizeClass}" style="display:none">${initialsFromName(nome)}</span>`;
+  }
+  return `<span class="avatar-initials ${sizeClass}">${initialsFromName(nome)}</span>`;
+}
+function gameIconHTML(jogo, size=''){
+  const t = gameTheme(jogo);
+  const cls = size==='lg' ? 'game-icon-lg' : 'game-icon';
+  return `<span class="${cls}">${t.code}</span>`;
+}
+function resizeImageToDataURL(file, maxSize){
+  return new Promise((resolve, reject)=>{
+    const reader = new FileReader();
+    reader.onerror = ()=>reject(new Error('read fail'));
+    reader.onload = ()=>{
+      const img = new Image();
+      img.onerror = ()=>reject(new Error('img fail'));
+      img.onload = ()=>{
+        let w = img.width, h = img.height;
+        if(w > maxSize || h > maxSize){
+          if(w > h){ h = Math.round(h * maxSize / w); w = maxSize; }
+          else { w = Math.round(w * maxSize / h); h = maxSize; }
+        }
+        const canvas = document.createElement('canvas');
+        canvas.width = w; canvas.height = h;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, w, h);
+        resolve(canvas.toDataURL('image/jpeg', 0.82));
+      };
+      img.src = reader.result;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+const THEME_PRESETS = {
+  verde:   {label:'Verde neon',  gold:'#C6FF1A', gold2:'#DFFF66'},
+  azul:    {label:'Azul elétrico',gold:'#1AD1FF', gold2:'#7FE9FF'},
+  rosa:    {label:'Rosa neon',   gold:'#FF3DAE', gold2:'#FF8FD1'},
+  laranja: {label:'Laranja',     gold:'#FF8A1A', gold2:'#FFC266'},
+  roxo:    {label:'Roxo',        gold:'#B26CFF', gold2:'#D9B8FF'},
+};
+function applyTema(key){
+  const t = THEME_PRESETS[key] || THEME_PRESETS.verde;
+  const root = document.documentElement.style;
+  root.setProperty('--gold', t.gold);
+  root.setProperty('--gold-2', t.gold2);
+  root.setProperty('--violet-2', t.gold);
+  root.setProperty('--win', t.gold);
+}
+
+/* ================= auth ================= */
+async function refreshUser(){
+  const { data:{ session } } = await db.auth.getSession();
+  if(!session){ state.user = null; return; }
+  const { data: adminRow } = await db.from('admins').select('user_id').eq('user_id', session.user.id).maybeSingle();
+  state.user = {
+    id: session.user.id,
+    email: session.user.email,
+    nome: (session.user.user_metadata && session.user.user_metadata.nome) || session.user.email.split('@')[0],
+    tema: (session.user.user_metadata && session.user.user_metadata.tema) || 'verde',
+    avatar: (session.user.user_metadata && session.user.user_metadata.avatar) || null,
+    role: adminRow ? 'admin' : 'jogador'
+  };
+  applyTema(state.user.tema);
+}
+
+/* ================= data load ================= */
+async function loadTorneios(){
+  const { data, error } = await db.from('torneios').select('*').order('created_at', {ascending:true});
+  if(error){ console.error(error); toast('Erro ao carregar campeonatos'); return; }
+  state.torneios = (data||[]).map(t=>({
+    ...t,
+    times: t.times||[],
+    partidas: t.partidas||null,
+    data_inicio: t.data_inicio||null,
+    regras: t.regras||'',
+    formato: t.formato||'mata_mata',
+    config: t.config||{},
+    grupos: t.grupos||null
+  }));
+}
+async function loadTimes(){
+  const { data, error } = await db.from('times').select('*').order('created_at', {ascending:true});
+  if(error){ console.error(error); toast('Erro ao carregar times'); return; }
+  state.times = (data||[]).map(tm=>({...tm, jogadores: tm.jogadores||[]}));
+}
+async function loadAll(){
+  await refreshUser();
+  await Promise.all([loadTorneios(), loadTimes()]);
+}
+
+/* ================= writes (Supabase) ================= */
+async function saveTorneio(t){
+  const payload = {
+    status:t.status, times:t.times, partidas:t.partidas,
+    nome:t.nome, jogo:t.jogo, data_inicio:t.data_inicio||null, regras:t.regras||'',
+    formato: t.formato||'mata_mata',
+    config: t.config||{},
+    grupos: t.grupos||null
+  };
+  const { error } = await db.from('torneios').update(payload).eq('id', t.id);
+  if(error){ console.error(error); toast('Erro ao salvar torneio: '+(error.message||'')); }
+}
+async function criarTorneio(payload){
+  const row = {
+    nome: payload.nome,
+    jogo: payload.jogo,
+    data_inicio: payload.data_inicio||null,
+    regras: payload.regras||'',
+    status: payload.status||'aberto',
+    times: payload.times||[],
+    formato: payload.formato||'mata_mata',
+    config: payload.config||{},
+    grupos: payload.grupos||null,
+    partidas: payload.partidas||null
+  };
+  const { data, error } = await db.from('torneios').insert(row).select().single();
+  if(error){
+    console.error(error);
+    // fallback se colunas novas ainda não existem
+    if(String(error.message||'').toLowerCase().includes('column') || error.code==='PGRST204'){
+      const { error: e2 } = await db.from('torneios').insert({
+        nome: row.nome, jogo: row.jogo, data_inicio: row.data_inicio, regras: row.regras,
+        status: row.status, times: row.times, partidas: row.partidas
+      });
+      if(e2){ console.error(e2); toast('Erro ao criar campeonato'); return false; }
+      toast('Campeonato criado (adicione colunas formato/config/grupos no Supabase para recursos completos)');
+      await loadTorneios();
+      return true;
+    }
+    toast('Erro ao criar campeonato (você precisa ser admin)');
+    return false;
+  }
+  await loadTorneios();
+  return data;
+}
+async function excluirTorneio(id){
+  const { error } = await db.from('torneios').delete().eq('id', id);
+  if(error){ console.error(error); toast('Erro ao excluir campeonato'); return; }
+  await loadTorneios();
+}
+async function criarTime(nome, jogo){
+  const { data, error } = await db.from('times').insert({nome, jogo, jogadores:[], dono: state.user.id}).select().single();
+  if(error){ console.error(error); toast('Erro ao criar inscrição'); return null; }
+  await loadTimes();
+  return data;
+}
+async function excluirTime(id){
+  const { error } = await db.from('times').delete().eq('id', id);
+  if(error){ console.error(error); toast('Erro ao remover time'); return; }
+  state.torneios.forEach(t=> t.times = (t.times||[]).filter(x=>x!==id));
+  await loadTimes();
+}
+async function inscreverNoTorneio(t){
+  let meuTime = state.times.find(tm=> tm.jogo===t.jogo && tm.dono===state.user.id);
+  if(!meuTime){
+    meuTime = await criarTime(state.user.nome, t.jogo);
+    if(!meuTime) return;
+  }
+  if((t.times||[]).includes(meuTime.id)){ toast('Você já está inscrito neste campeonato'); return; }
+  t.times = [...(t.times||[]), meuTime.id];
+  await saveTorneio(t);
+  toast('Inscrito com sucesso!');
+  render();
+}
+
+/* ================= bracket logic ================= */
+function nextPow2(n){ let p=1; while(p<n) p*=2; return p; }
+
+function shuffleArr(arr){
+  const a=[...arr];
+  for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; }
+  return a;
+}
+
+function gerarChaveamento(times){
+  const shuffled = shuffleArr(times);
+  const size = nextPow2(Math.max(shuffled.length,2));
+  while(shuffled.length < size) shuffled.push(null);
+  const totalRounds = Math.log2(size);
+  const matches = [];
+  let idCounter = 0;
+  for(let i=0;i<size/2;i++){
+    matches.push({id: idCounter++, fase:'mata_mata', round:0, pos:i, timeA: shuffled[i*2], timeB: shuffled[i*2+1], vencedor:null, scoreA:'', scoreB:''});
+  }
+  for(let r=1;r<totalRounds;r++){
+    const count = size/Math.pow(2,r+1);
+    for(let i=0;i<count;i++){
+      matches.push({id: idCounter++, fase:'mata_mata', round:r, pos:i, timeA:null, timeB:null, vencedor:null, scoreA:'', scoreB:''});
+    }
+  }
+  resolveByes(matches, totalRounds);
+  return matches;
+}
+
+function gerarPontosCorridos(times, idaVolta){
+  const list = shuffleArr(times.filter(Boolean));
+  const matches = [];
+  let id=0;
+  for(let i=0;i<list.length;i++){
+    for(let j=i+1;j<list.length;j++){
+      matches.push({id:id++, fase:'pontos', round:0, pos:matches.length, grupo:null, timeA:list[i], timeB:list[j], vencedor:null, scoreA:'', scoreB:''});
+      if(idaVolta){
+        matches.push({id:id++, fase:'pontos', round:0, pos:matches.length, grupo:null, timeA:list[j], timeB:list[i], vencedor:null, scoreA:'', scoreB:''});
+      }
+    }
+  }
+  return matches;
+}
+
+function gerarGrupos(times, numGrupos, idaVolta){
+  const list = shuffleArr(times.filter(Boolean));
+  const n = Math.max(2, Math.min(numGrupos, Math.floor(list.length/2) || 2));
+  const grupos = Array.from({length:n}, (_,i)=>({ id:i, nome:'Grupo '+String.fromCharCode(65+i), times:[], tabela:[] }));
+  list.forEach((tm,i)=> grupos[i%n].times.push(tm));
+  const matches = [];
+  let id=0;
+  grupos.forEach(g=>{
+    g.tabela = g.times.map(tm=>({ id:tm.id, nome:tm.nome, j:0, v:0, e:0, d:0, gp:0, gc:0, pts:0 }));
+    for(let i=0;i<g.times.length;i++){
+      for(let j=i+1;j<g.times.length;j++){
+        matches.push({id:id++, fase:'grupo', round:0, pos:matches.length, grupo:g.id, timeA:g.times[i], timeB:g.times[j], vencedor:null, scoreA:'', scoreB:''});
+        if(idaVolta){
+          matches.push({id:id++, fase:'grupo', round:0, pos:matches.length, grupo:g.id, timeA:g.times[j], timeB:g.times[i], vencedor:null, scoreA:'', scoreB:''});
+        }
+      }
+    }
+  });
+  return { grupos, matches };
+}
+
+function gerarDuplaEliminacao(times){
+  // Winners bracket = normal single elim; losers bracket slots reserved
+  const base = gerarChaveamento(times);
+  base.forEach(m=>{ m.fase='winners'; m.bracket='winners'; });
+  // Losers bracket matches created as empty shells proportional to winners
+  const winnersRounds = Math.max(...base.map(m=>m.round))+1;
+  let id = base.length ? Math.max(...base.map(m=>m.id))+1 : 0;
+  const losers = [];
+  // simplified: one losers match per winners match except final
+  for(let r=0;r<winnersRounds-1;r++){
+    const count = base.filter(m=>m.round===r && m.fase==='winners').length;
+    for(let i=0;i<count;i++){
+      losers.push({id:id++, fase:'losers', bracket:'losers', round:r, pos:i, timeA:null, timeB:null, vencedor:null, scoreA:'', scoreB:''});
+    }
+  }
+  // grand final
+  losers.push({id:id++, fase:'grand_final', bracket:'grand_final', round:0, pos:0, timeA:null, timeB:null, vencedor:null, scoreA:'', scoreB:''});
+  return [...base, ...losers];
+}
+
+function atualizarTabelaGrupo(t, match){
+  if(!t.grupos || match.fase!=='grupo' || match.scoreA==='' || match.scoreB==='') return;
+  const g = t.grupos.find(x=>x.id===match.grupo);
+  if(!g) return;
+  const sa = Number(match.scoreA), sb = Number(match.scoreB);
+  const rowA = g.tabela.find(r=>r.id===(match.timeA&&match.timeA.id));
+  const rowB = g.tabela.find(r=>r.id===(match.timeB&&match.timeB.id));
+  if(!rowA||!rowB) return;
+  // reset then rebuild from all group matches (safer)
+  g.tabela.forEach(r=>{ r.j=0;r.v=0;r.e=0;r.d=0;r.gp=0;r.gc=0;r.pts=0; });
+  (t.partidas||[]).filter(m=>m.fase==='grupo' && m.grupo===g.id && m.scoreA!=='' && m.scoreB!=='').forEach(m=>{
+    const a = g.tabela.find(r=>r.id===(m.timeA&&m.timeA.id));
+    const b = g.tabela.find(r=>r.id===(m.timeB&&m.timeB.id));
+    if(!a||!b) return;
+    const x=Number(m.scoreA), y=Number(m.scoreB);
+    a.j++; b.j++; a.gp+=x; a.gc+=y; b.gp+=y; b.gc+=x;
+    if(x>y){ a.v++; b.d++; a.pts+=3; }
+    else if(y>x){ b.v++; a.d++; b.pts+=3; }
+    else { a.e++; b.e++; a.pts++; b.pts++; }
+  });
+  g.tabela.sort((a,b)=> b.pts-a.pts || (b.gp-b.gc)-(a.gp-a.gc) || b.gp-a.gp);
+}
+
+function classificadosDosGrupos(t){
+  const n = (t.config && t.config.classificadosPorGrupo) || 2;
+  const adv = [];
+  (t.grupos||[]).forEach(g=>{
+    g.tabela.slice(0,n).forEach(r=>{
+      const tm = g.times.find(x=>x.id===r.id) || {id:r.id, nome:r.nome};
+      adv.push(tm);
+    });
+  });
+  return adv;
+}
+
+function gruposCompletos(t){
+  const groupMatches = (t.partidas||[]).filter(m=>m.fase==='grupo');
+  return groupMatches.length>0 && groupMatches.every(m=>m.vencedor || (m.scoreA!==''&&m.scoreB!==''&&Number(m.scoreA)===Number(m.scoreB)));
+}
+
+function resolveByes(matches, totalRounds){
+  for(let r=0;r<totalRounds;r++){
+    matches.filter(m=>m.round===r && (m.fase==='mata_mata'||m.fase==='winners'||!m.fase)).forEach(m=>{
+      if(m.vencedor) return;
+      if(m.timeA && !m.timeB){ setVencedor(matches, m, m.timeA, totalRounds); }
+      else if(m.timeB && !m.timeA){ setVencedor(matches, m, m.timeB, totalRounds); }
+    });
+  }
+}
+
+function setVencedor(matches, match, timeVencedor, totalRounds){
+  match.vencedor = timeVencedor;
+  if(match.fase==='grupo' || match.fase==='pontos') return;
+  if(match.fase==='grand_final') return;
+  if(match.round+1 >= totalRounds) return;
+  const nextPos = Math.floor(match.pos/2);
+  const nextFase = match.fase==='winners' ? 'winners' : (match.fase||'mata_mata');
+  const next = matches.find(m=>m.round===match.round+1 && m.pos===nextPos && (m.fase===nextFase || (!m.fase && nextFase==='mata_mata')));
+  if(!next) return;
+  if(match.pos % 2 === 0) next.timeA = timeVencedor; else next.timeB = timeVencedor;
+  if(next.timeA && !next.timeB) setVencedor(matches, next, next.timeA, totalRounds);
+  else if(next.timeB && !next.timeA) setVencedor(matches, next, next.timeB, totalRounds);
+}
+
+function iniciarTorneioComFormato(t, timesObjs){
+  const times = timesObjs.map(tm=>({id:tm.id, nome:tm.nome}));
+  const formato = t.formato || 'mata_mata';
+  const config = t.config || {};
+  if(formato==='mata_mata'){
+    t.partidas = gerarChaveamento(times);
+    t.grupos = null;
+  } else if(formato==='pontos'){
+    t.partidas = gerarPontosCorridos(times, !!config.idaVolta);
+    t.grupos = null;
+  } else if(formato==='grupos_mata_mata'){
+    const { grupos, matches } = gerarGrupos(times, config.numGrupos||4, !!config.idaVolta);
+    t.grupos = grupos;
+    t.partidas = matches;
+  } else if(formato==='dupla_eliminacao'){
+    t.partidas = gerarDuplaEliminacao(times);
+    t.grupos = null;
+  } else {
+    t.partidas = gerarChaveamento(times);
+  }
+  t.status = 'andamento';
+}
+
+const FORMATOS = [
+  { id:'mata_mata', nome:'Mata-mata', desc:'Chaveamento único. Perdeu, eliminou. Ideal para 4–32 times.', icon:'MM' },
+  { id:'grupos_mata_mata', nome:'Grupos + Mata-mata', desc:'Fase de grupos (todos jogam) e depois chaveamento com os classificados.', icon:'G+' },
+  { id:'pontos', nome:'Pontos corridos', desc:'Todos contra todos. Tabela por pontos (vitória 3, empate 1).', icon:'PC' },
+  { id:'dupla_eliminacao', nome:'Dupla eliminação', desc:'Chave de vencedores + chave de perdedores (repescagem). Só elimina com 2 derrotas.', icon:'DE' },
+];
+
+/* ================= rendering ================= */
+function renderNav(){
+  const nav = document.getElementById('mainNav');
+  const tabs = [['torneios','Torneios'],['times','Times'],['ranking','Ranking']];
+  if(state.user) tabs.push(['perfil','Perfil']);
+  if(state.user && state.user.role==='admin') tabs.push(['admin','Admin']);
+  nav.innerHTML = tabs.map(([id,label])=>`<button data-tab="${id}" class="${state.tab===id?'active':''}">${label}</button>`).join('');
+  nav.querySelectorAll('button').forEach(b=>b.onclick=()=>{
+    const next=b.dataset.tab;
+    if(next!=='admin') state.wizard=null;
+    state.tab=next; state.torneioAtivo=null; render();
+  });
+
+  const sb = document.getElementById('sessionBox');
+  if(state.user){
+    sb.innerHTML = `<span class="user-chip">${avatarHTML(state.user)} <span>Olá, <b>${state.user.nome}</b>${state.user.role==='admin'?' (admin)':''}</span></span><button class="btn btn-ghost" id="logoutBtn">Sair</button>`;
+    document.getElementById('logoutBtn').onclick = async ()=>{ await db.auth.signOut(); state.user=null; state.tab='torneios'; render(); };
+  } else {
+    sb.innerHTML = `<button class="btn btn-gold" id="loginBtn">Entrar</button>`;
+    document.getElementById('loginBtn').onclick = ()=>{ state.tab='login'; render(); };
+  }
+}
+
+function render(){
+  const tabChanged = state._lastTab !== state.tab || state._lastTorneio !== state.torneioAtivo || state._lastAdminTab !== state.adminTab;
+  state._lastTab = state.tab;
+  state._lastTorneio = state.torneioAtivo;
+  state._lastAdminTab = state.adminTab;
+
+  renderNav();
+  renderTicker();
+  const view = document.getElementById('view');
+  view.innerHTML = '';
+  if(tabChanged) restartViewAnim();
+  syncURL();
+  if(state.tab==='login') renderLogin(view);
+  else if(state.tab==='torneios') state.torneioAtivo ? renderTorneioDetalhe(view) : renderTorneios(view);
+  else if(state.tab==='times') renderTimes(view);
+  else if(state.tab==='ranking') renderRanking(view);
+  else if(state.tab==='perfil') renderPerfil(view);
+  else if(state.tab==='admin') renderAdmin(view);
+  requestAnimationFrame(()=> staggerCards(view));
+  if(tabChanged){
+    window.scrollTo({top:0, behavior:'smooth'});
+  }
+}
+function syncURL(){
+  const url = new URL(window.location.href);
+  if(state.tab==='torneios' && state.torneioAtivo){
+    url.searchParams.set('torneio', state.torneioAtivo);
+  } else {
+    url.searchParams.delete('torneio');
+  }
+  history.replaceState(null, '', url.toString());
+}
+
+/* ---- login / cadastro ---- */
+function renderLogin(view){
+  view.appendChild(h(`
+    <div class="hero" style="padding-top:10px;">
+      <h1 style="font-size:38px;">Entrar</h1>
+      <p>Acesse com sua conta para inscrever times e acompanhar seus torneios.</p>
+    </div>
+    <div class="form-row">
+      <div class="form-box">
+        <h3 style="margin-top:0;">Login</h3>
+        <div class="field"><label>E-mail</label><input id="lu" type="email"/></div>
+        <div class="field"><label>Senha</label><input id="lp" type="password"/></div>
+        <button class="btn btn-gold" id="loginSubmit" style="width:100%;">Entrar</button>
+      </div>
+      <div class="form-box">
+        <h3 style="margin-top:0;">Criar conta</h3>
+        <div class="field"><label>Nome de exibição</label><input id="rn"/></div>
+        <div class="field"><label>E-mail</label><input id="ru" type="email"/></div>
+        <div class="field"><label>Senha</label><input id="rp" type="password"/></div>
+        <button class="btn btn-ghost" id="regSubmit" style="width:100%;">Criar conta</button>
+      </div>
+    </div>
+  `));
+  document.getElementById('loginSubmit').onclick = async ()=>{
+    const email=document.getElementById('lu').value.trim(), senha=document.getElementById('lp').value;
+    if(!email||!senha){ toast('Preencha e-mail e senha'); return; }
+    const { error } = await db.auth.signInWithPassword({email, password:senha});
+    if(error){ toast('E-mail ou senha inválidos'); return; }
+    await loadAll();
+    state.tab='torneios'; render(); toast('Bem-vindo!');
+  };
+  document.getElementById('regSubmit').onclick = async ()=>{
+    const nome=document.getElementById('rn').value.trim();
+    const email=document.getElementById('ru').value.trim(), senha=document.getElementById('rp').value;
+    if(!nome||!email||!senha){ toast('Preencha todos os campos'); return; }
+    if(senha.length<6){ toast('A senha precisa ter ao menos 6 caracteres'); return; }
+    const { data, error } = await db.auth.signUp({email, password:senha, options:{data:{nome}}});
+    if(error){ toast(error.message); return; }
+    if(data.session){
+      await loadAll();
+      state.tab='torneios'; render(); toast('Conta criada, bem-vindo!');
+    } else {
+      toast('Conta criada! Confirme seu e-mail antes de entrar.');
+      state.tab='login'; render();
+    }
+  };
+}
+
+/* ---- torneios (lista) ---- */
+function renderTorneios(view){
+  const abertos = state.torneios.filter(t=>t.status==='aberto').length;
+  const andamento = state.torneios.filter(t=>t.status==='andamento').length;
+  const totalTimes = state.times.length;
+  const heroEl = h(`
+    <div class="hero-banner">
+      <div class="inner">
+        <h1>Campeonatos ativos<br>e futuros.</h1>
+        <p>FIFA, League of Legends, Valorant e mais — inscreva seu time e acompanhe o chaveamento em tempo real.</p>
+        <div class="hero-stats">
+          <div class="stat"><b data-count="${state.torneios.length}">0</b><span>Campeonatos</span></div>
+          <div class="stat"><b data-count="${abertos}">0</b><span>Inscrições abertas</span></div>
+          <div class="stat"><b data-count="${andamento}">0</b><span>Em andamento</span></div>
+          <div class="stat"><b data-count="${totalTimes}">0</b><span>Times cadastrados</span></div>
+        </div>
+      </div>
+    </div>
+  `);
+  view.appendChild(heroEl);
+  animateCounters(heroEl);
+  const box = h(`<div class="grid" id="torneiosGrid"></div>`);
+  view.appendChild(box);
+  if(state.torneios.length===0){
+    box.replaceWith(h(`<div class="empty">Nenhum campeonato criado ainda. ${state.user && state.user.role==='admin' ? 'Vá em Admin para criar o primeiro.' : ''}</div>`));
+    return;
+  }
+  const statusLabel = {aberto:'Inscrições abertas', andamento:'Em andamento', finalizado:'Finalizado'};
+  state.torneios.forEach((t,i)=>{
+    const theme = gameTheme(t.jogo);
+    let avisoInicio = '';
+    if(t.status==='aberto' && t.data_inicio){
+      const cd = formatCountdown(t.data_inicio);
+      if(cd) avisoInicio = `<div style="color:var(--gold);font-size:12px;font-weight:700;margin-top:4px;">Começa em ${cd}</div>`;
+    }
+    const card = h(`
+      <div class="card" style="animation-delay:${i*0.06}s;">
+        <div class="banner" style="background:${theme.grad}">${gameIconHTML(t.jogo)}</div>
+        <div class="card-body">
+          <span class="tag status-${t.status}">${statusLabel[t.status]}</span>
+          <h3>${t.nome}</h3>
+          <div class="muted">${t.jogo} · ${(t.times||[]).length} time(s) · ${({mata_mata:'Mata-mata',grupos_mata_mata:'Grupos',pontos:'Pontos',dupla_eliminacao:'Dupla elim.'}[t.formato]||'Mata-mata')}</div>
+          ${avisoInicio}
+          <div class="row">
+            <button class="btn btn-ghost" data-open="${t.id}">Ver detalhes</button>
+          </div>
+        </div>
+      </div>
+    `);
+    box.appendChild(card);
+  });
+  box.querySelectorAll('[data-open]').forEach(btn=>btn.onclick=()=>{ state.torneioAtivo = btn.dataset.open; state._editandoTorneio=false; render(); });
+}
+
+let countdownInterval = null;
+function formatCountdown(dataISO){
+  const diff = new Date(dataISO).getTime() - Date.now();
+  if(diff<=0) return null;
+  const s = Math.floor(diff/1000);
+  const d = Math.floor(s/86400), h = Math.floor((s%86400)/3600), m = Math.floor((s%3600)/60);
+  if(d>0) return `${d}d ${h}h`;
+  if(h>0) return `${h}h ${m}m`;
+  return `${m}m`;
+}
+function exportarCSV(t){
+  const linhas = [['Nome','Jogo']];
+  (t.times||[]).forEach(id=>{
+    const tm = state.times.find(x=>x.id===id);
+    if(tm) linhas.push([tm.nome, tm.jogo]);
+  });
+  const csv = linhas.map(l=>l.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(',')).join('\n');
+  const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = `inscritos-${t.nome}.csv`;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+async function compartilhar(t){
+  const url = new URL(window.location.href);
+  url.searchParams.set('torneio', t.id);
+  const link = url.toString();
+  if(navigator.share){
+    try{ await navigator.share({title:t.nome, text:`Confira o campeonato ${t.nome} no e-Expedition!`, url:link}); return; }catch(e){ /* usuário cancelou */ return; }
+  }
+  try{ await navigator.clipboard.writeText(link); toast('Link copiado!'); }
+  catch(e){ toast('Não foi possível copiar o link'); }
+}
+
+/* ---- torneio detalhe (inscrição + bracket) ---- */
+function renderTorneioDetalhe(view){
+  const t = state.torneios.find(x=>x.id===state.torneioAtivo);
+  if(countdownInterval){ clearInterval(countdownInterval); countdownInterval=null; }
+  if(!t){ state.torneioAtivo=null; return renderTorneios(view); }
+  const statusLabel = {aberto:'Inscrições abertas', andamento:'Em andamento', finalizado:'Finalizado'};
+  const theme = gameTheme(t.jogo);
+  const dataFmt = t.data_inicio ? new Date(t.data_inicio).toLocaleString('pt-BR', {dateStyle:'short', timeStyle:'short'}) : null;
+
+  view.appendChild(h(`
+    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:16px;">
+      <button class="btn btn-ghost" id="backBtn">&larr; Voltar</button>
+      <button class="btn btn-ghost" id="shareBtn">Compartilhar</button>
+    </div>
+    <div class="detail-banner" style="background:${theme.grad}">
+      <div class="inner">
+        <span class="tag status-${t.status}">${statusLabel[t.status]}</span>
+        <h1>${t.nome}</h1>
+        <div class="muted">${t.jogo}${dataFmt ? ' · Início: '+dataFmt : ''}</div>
+        <div class="muted" id="countdownText" style="margin-top:6px;font-weight:700;"></div>
+      </div>
+      ${gameIconHTML(t.jogo, 'lg')}
+    </div>
+  `));
+  document.getElementById('backBtn').onclick=()=>{ state.torneioAtivo=null; state._editandoTorneio=false; render(); };
+  document.getElementById('shareBtn').onclick=()=>compartilhar(t);
+
+  if(t.data_inicio){
+    const cdEl = document.getElementById('countdownText');
+    const tick = ()=>{
+      const txt = formatCountdown(t.data_inicio);
+      if(!cdEl) { clearInterval(countdownInterval); return; }
+      cdEl.textContent = txt ? `Começa em ${txt}` : '';
+    };
+    tick();
+    countdownInterval = setInterval(tick, 30000);
+  }
+
+  if(t.regras){
+    view.appendChild(h(`<div class="card" style="margin-bottom:20px;"><div class="card-body"><h3 style="margin-top:0;">Regras / Edital</h3><p class="muted" style="white-space:pre-wrap;margin:0;">${t.regras}</p></div></div>`));
+  }
+
+  if(t.status==='aberto'){
+    const wrap = h(`<div class="card" style="max-width:460px;margin-bottom:24px;"><div class="card-body"><h3 style="margin-top:0;">Inscrição</h3></div></div>`);
+    const body = wrap.querySelector('.card-body');
+    if(!state.user){
+      body.appendChild(h(`<div class="muted">Faça login para se inscrever.</div>`));
+    } else {
+      const meuTime = state.times.find(tm=> tm.jogo===t.jogo && tm.dono===state.user.id);
+      const jaInscrito = meuTime && (t.times||[]).includes(meuTime.id);
+      if(jaInscrito){
+        body.appendChild(h(`<div class="muted">Você já está inscrito neste campeonato como <b style="color:var(--text);">${state.user.nome}</b>.</div>`));
+      } else {
+        body.appendChild(h(`<div class="muted" style="margin-bottom:10px;">Você se inscreve individualmente, usando seu nome de usuário (<b style="color:var(--text);">${state.user.nome}</b>). Só é permitida 1 inscrição por campeonato.</div>`));
+        const btn = h(`<button class="btn btn-gold" style="width:100%;">Inscrever-se</button>`);
+        btn.onclick = ()=> inscreverNoTorneio(t);
+        body.appendChild(btn);
+      }
+    }
+    view.appendChild(wrap);
+  }
+
+  view.appendChild(h(`<div class="section-title" style="margin-bottom:10px;"><h3 style="margin:0;">Times inscritos (${(t.times||[]).length})</h3>${state.user && state.user.role==='admin' && (t.times||[]).length>0 ? '<button class="btn btn-ghost" id="csvBtn" style="padding:6px 12px;font-size:12.5px;">⬇ Exportar CSV</button>' : ''}</div>`));
+  const csvBtnEl = document.getElementById('csvBtn');
+  if(csvBtnEl) csvBtnEl.onclick = ()=> exportarCSV(t);
+  const listBox = h(`<div class="player-list" style="margin-bottom:22px;"></div>`);
+  (t.times||[]).forEach(id=>{
+    const tm = state.times.find(x=>x.id===id);
+    if(tm) listBox.appendChild(h(`<span>${tm.nome}</span>`));
+  });
+  if(!t.times || t.times.length===0) listBox.appendChild(h(`<span>Nenhum time ainda</span>`));
+  view.appendChild(listBox);
+
+  if(state.user && state.user.role==='admin'){
+    const actions = h(`<div style="margin-bottom:24px;display:flex;gap:10px;flex-wrap:wrap;"></div>`);
+    if(t.status==='aberto'){
+      const genBtn = h(`<button class="btn btn-gold">Fechar inscrições e iniciar torneio</button>`);
+      genBtn.disabled = (t.times||[]).length < 2;
+      if(genBtn.disabled) genBtn.title='Precisa de ao menos 2 times';
+      genBtn.onclick = async ()=>{
+        const timesObjs = t.times.map(id=>state.times.find(x=>x.id===id)).filter(Boolean);
+        iniciarTorneioComFormato(t, timesObjs);
+        await saveTorneio(t);
+        toast('Torneio iniciado!');
+        render();
+      };
+      actions.appendChild(genBtn);
+    } else {
+      const reopenBtn = h(`<button class="btn btn-ghost">↺ Reabrir inscrições</button>`);
+      reopenBtn.onclick = async ()=>{
+        if(!confirm('Reabrir inscrições deste campeonato?')) return;
+        t.status='aberto'; await saveTorneio(t); toast('Inscrições reabertas'); render();
+      };
+      actions.appendChild(reopenBtn);
+    }
+    if(t.status==='andamento'){
+      const finBtn = h(`<button class="btn btn-ghost">Marcar torneio como finalizado</button>`);
+      finBtn.onclick = async ()=>{ t.status='finalizado'; await saveTorneio(t); render(); };
+      actions.appendChild(finBtn);
+    }
+    const editBtn = h(`<button class="btn btn-ghost">✎ Editar</button>`);
+    editBtn.onclick = ()=>{ state._editandoTorneio = !state._editandoTorneio; render(); };
+    actions.appendChild(editBtn);
+    const delBtn = h(`<button class="btn btn-danger">Excluir torneio</button>`);
+    delBtn.onclick = async ()=>{
+      if(!confirm('Excluir este torneio?')) return;
+      await excluirTorneio(t.id);
+      state.torneioAtivo=null; render();
+    };
+    actions.appendChild(delBtn);
+    view.appendChild(actions);
+
+    if(state._editandoTorneio){
+      const editCard = h(`<div class="form-box" style="max-width:460px;margin-bottom:24px;"><h3 style="margin-top:0;">Editar campeonato</h3></div>`);
+      editCard.appendChild(h(`<div class="field"><label>Nome</label><input id="eNome" value="${t.nome}"/></div>`));
+      const eJogoSel = h(`<div class="field"><label>Jogo</label><select id="eJogo">${JOGOS.map(g=>`<option ${g===t.jogo?'selected':''}>${g}</option>`).join('')}</select></div>`);
+      editCard.appendChild(eJogoSel);
+      const dataVal = t.data_inicio ? new Date(t.data_inicio).toISOString().slice(0,16) : '';
+      editCard.appendChild(h(`<div class="field"><label>Data/hora de início (opcional)</label><input id="eData" type="datetime-local" value="${dataVal}"/></div>`));
+      editCard.appendChild(h(`<div class="field"><label>Regras / Edital (opcional)</label><textarea id="eRegras" rows="4" style="width:100%;background:var(--surface-2);border:1px solid var(--border);color:var(--text);padding:10px 12px;border-radius:8px;font-size:14.5px;font-family:inherit;">${t.regras||''}</textarea></div>`));
+      const eSalvar = h(`<button class="btn btn-gold" style="width:100%;">Salvar alterações</button>`);
+      eSalvar.onclick = async ()=>{
+        t.nome = document.getElementById('eNome').value.trim() || t.nome;
+        t.jogo = document.getElementById('eJogo').value;
+        const dataInput = document.getElementById('eData').value;
+        t.data_inicio = dataInput ? new Date(dataInput).toISOString() : null;
+        t.regras = document.getElementById('eRegras').value;
+        await saveTorneio(t);
+        state._editandoTorneio = false;
+        toast('Campeonato atualizado!');
+        render();
+      };
+      editCard.appendChild(eSalvar);
+      view.appendChild(editCard);
+    }
+  }
+
+  if(t.formato==='grupos_mata_mata' || (t.grupos&&t.grupos.length)){
+    view.appendChild(renderGruposUI(t));
+  }
+  if(t.formato==='pontos'){
+    view.appendChild(renderPontosUI(t));
+  }
+  if(t.partidas && t.partidas.length && matchesPorFase(t, ['mata_mata','winners','losers','grand_final']).length){
+    view.appendChild(h(`<h3>Chaveamento</h3>`));
+    view.appendChild(renderBracket(t));
+  }
+}
+
+
+function matchesPorFase(t, fases){
+  return (t.partidas||[]).filter(m=> fases.includes(m.fase||'mata_mata'));
+}
+
+function confirmarPlacar(t, m, sa, sb, totalRounds){
+  if(sa===''||sb===''){ toast('Informe o placar'); return false; }
+  const allowDraw = m.fase==='grupo' || m.fase==='pontos';
+  if(!allowDraw && sa===sb){ toast('Informe um placar válido (sem empate)'); return false; }
+  m.scoreA=sa; m.scoreB=sb;
+  if(Number(sa)===Number(sb)){
+    m.vencedor = null; // empate
+  } else {
+    const vencedor = Number(sa)>Number(sb) ? m.timeA : m.timeB;
+    if(m.fase==='grupo' || m.fase==='pontos'){
+      m.vencedor = vencedor;
+    } else {
+      setVencedor(t.partidas, m, vencedor, totalRounds);
+    }
+  }
+  if(m.fase==='grupo') atualizarTabelaGrupo(t, m);
+  return true;
+}
+
+function renderMatchCard(t, m, totalRounds){
+  const nameA = m.timeA ? m.timeA.nome : (m.timeB===null&&m.timeA===null? 'A definir' : '—');
+  const nameB = m.timeB ? m.timeB.nome : (m.timeA===null&&m.timeB===null? 'A definir' : '—');
+  const done = m.scoreA!=='' && m.scoreB!=='';
+  const editable = state.user && state.user.role==='admin' && m.timeA && m.timeB && !done;
+  const matchEl = h(`<div class="match ${done?'decidido':''}">
+    <div class="slot ${m.vencedor && m.vencedor.id===(m.timeA&&m.timeA.id) ? 'win':''} ${!m.timeA?'bye':''}">
+      <span class="name">${nameA}</span>
+      ${editable ? `<input type="number" min="0" data-side="A" value="${m.scoreA}"/>` : (m.timeA? `<span>${m.scoreA!==''?m.scoreA:''}</span>`:'')}
+    </div>
+    <div class="slot ${m.vencedor && m.vencedor.id===(m.timeB&&m.timeB.id) ? 'win':''} ${!m.timeB?'bye':''}">
+      <span class="name">${nameB}</span>
+      ${editable ? `<input type="number" min="0" data-side="B" value="${m.scoreB}"/>` : (m.timeB? `<span>${m.scoreB!==''?m.scoreB:''}</span>`:'')}
+    </div>
+  </div>`);
+  if(editable){
+    matchEl.appendChild(h(`<button class="btn btn-ghost" style="width:100%;border-radius:0 0 12px 12px;font-size:12px;padding:6px;">Confirmar resultado</button>`));
+    matchEl.lastElementChild.onclick = async ()=>{
+      const sa = matchEl.querySelector('[data-side="A"]').value;
+      const sb = matchEl.querySelector('[data-side="B"]').value;
+      if(!confirmarPlacar(t, m, sa, sb, totalRounds)) return;
+      await saveTorneio(t);
+      toast('Resultado salvo');
+      render();
+    };
+  }
+  return matchEl;
+}
+
+function renderBracket(t){
+  const knockout = matchesPorFase(t, ['mata_mata','winners','losers','grand_final']);
+  if(!knockout.length) return h('<div class="empty">Sem chaveamento ainda.</div>');
+  const rounds = knockout.map(m=>m.round);
+  const totalRounds = Math.max(...rounds) + 1;
+  // group by fase for double elim
+  const fases = [];
+  if(knockout.some(m=>m.fase==='winners'||m.fase==='mata_mata'||!m.fase)) fases.push({key:['mata_mata','winners'], title:'Chave principal'});
+  if(knockout.some(m=>m.fase==='losers')) fases.push({key:['losers'], title:'Repescagem (perdedores)'});
+  if(knockout.some(m=>m.fase==='grand_final')) fases.push({key:['grand_final'], title:'Grande final'});
+
+  const outer = h('<div></div>');
+  fases.forEach(f=>{
+    const subset = knockout.filter(m=>f.key.includes(m.fase||'mata_mata'));
+    if(!subset.length) return;
+    if(fases.length>1) outer.appendChild(h(`<h3 style="margin:18px 0 10px;">${f.title}</h3>`));
+    const wrap = h(`<div class="bracket"></div>`);
+    const maxR = Math.max(...subset.map(m=>m.round));
+    const roundNames = (r)=>{
+      const left = maxR - r + 1;
+      if(f.key.includes('grand_final')) return 'Grande final';
+      if(left===1) return 'Final';
+      if(left===2) return 'Semifinal';
+      if(left===3) return 'Quartas';
+      return 'Rodada '+(r+1);
+    };
+    for(let r=0;r<=maxR;r++){
+      const col = h(`<div class="round-col"><div class="round-title">${roundNames(r)}</div></div>`);
+      const matchesRound = subset.filter(m=>m.round===r).sort((a,b)=>a.pos-b.pos);
+      const isLast = r===maxR;
+      let pairContainer = null;
+      matchesRound.forEach((m,idx)=>{
+        const matchEl = renderMatchCard(t, m, totalRounds);
+        if(isLast || matchesRound.length===1){
+          col.appendChild(matchEl);
+        } else {
+          if(idx%2===0){
+            pairContainer = h('<div class="pair"></div>');
+            col.appendChild(pairContainer);
+          }
+          pairContainer.appendChild(matchEl);
+        }
+      });
+      wrap.appendChild(col);
+    }
+    outer.appendChild(wrap);
+  });
+  return outer;
+}
+
+function renderGruposUI(t){
+  const wrap = h('<div></div>');
+  if(!t.grupos || !t.grupos.length) return wrap;
+  wrap.appendChild(h(`<h3>Fase de grupos</h3>`));
+  const grid = h('<div class="grid" style="margin-bottom:20px;"></div>');
+  t.grupos.forEach(g=>{
+    const card = h(`<div class="card"><div class="card-body"></div></div>`);
+    const body = card.querySelector('.card-body');
+    body.appendChild(h(`<h3 style="margin-top:0;">${g.nome}</h3>`));
+    const table = h(`<table><thead><tr><th>#</th><th>Time</th><th>J</th><th>V</th><th>E</th><th>D</th><th>SG</th><th>Pts</th></tr></thead><tbody></tbody></table>`);
+    const tb = table.querySelector('tbody');
+    (g.tabela||[]).forEach((r,i)=>{
+      tb.appendChild(h(`<tr><td>${i+1}</td><td>${r.nome}</td><td>${r.j}</td><td>${r.v}</td><td>${r.e}</td><td>${r.d}</td><td>${r.gp-r.gc}</td><td><b>${r.pts}</b></td></tr>`));
+    });
+    const tw = h('<div class="table-wrap"></div>');
+    tw.appendChild(table);
+    body.appendChild(tw);
+    grid.appendChild(card);
+  });
+  wrap.appendChild(grid);
+
+  const groupMatches = matchesPorFase(t, ['grupo']);
+  if(groupMatches.length){
+    wrap.appendChild(h(`<h3>Jogos dos grupos</h3>`));
+    const list = h('<div class="grid" style="grid-template-columns:repeat(auto-fill,minmax(220px,1fr));margin-bottom:20px;"></div>');
+    groupMatches.forEach(m=>{
+      const gName = (t.grupos.find(x=>x.id===m.grupo)||{}).nome || '';
+      const box = h(`<div></div>`);
+      box.appendChild(h(`<div class="muted" style="font-size:11px;margin-bottom:4px;">${gName}</div>`));
+      box.appendChild(renderMatchCard(t, m, 1));
+      list.appendChild(box);
+    });
+    wrap.appendChild(list);
+  }
+
+  if(state.user && state.user.role==='admin' && t.formato==='grupos_mata_mata' && !matchesPorFase(t, ['mata_mata']).length){
+    const allDone = groupMatches.every(m=>m.scoreA!==''&&m.scoreB!=='');
+    const btn = h(`<button class="btn btn-gold" style="margin-bottom:24px;">Gerar mata-mata com classificados</button>`);
+    btn.disabled = !allDone;
+    if(!allDone) btn.title = 'Finalize todos os jogos dos grupos primeiro';
+    btn.onclick = async ()=>{
+      const adv = classificadosDosGrupos(t);
+      if(adv.length<2){ toast('Poucos classificados'); return; }
+      const bracket = gerarChaveamento(adv);
+      t.partidas = [...groupMatches, ...bracket];
+      await saveTorneio(t);
+      toast('Mata-mata gerado!');
+      render();
+    };
+    wrap.appendChild(btn);
+  }
+  return wrap;
+}
+
+function renderPontosUI(t){
+  const matches = matchesPorFase(t, ['pontos']);
+  if(!matches.length) return h('');
+  const wrap = h('<div></div>');
+  // standings
+  const stats = {};
+  (t.times||[]).forEach(id=>{
+    const tm = state.times.find(x=>x.id===id);
+    if(tm) stats[id] = {id, nome:tm.nome, j:0,v:0,e:0,d:0,gp:0,gc:0,pts:0};
+  });
+  matches.forEach(m=>{
+    if(m.scoreA===''||m.scoreB==='') return;
+    const a = stats[m.timeA&&m.timeA.id], b = stats[m.timeB&&m.timeB.id];
+    if(!a||!b) return;
+    const x=Number(m.scoreA), y=Number(m.scoreB);
+    a.j++;b.j++;a.gp+=x;a.gc+=y;b.gp+=y;b.gc+=x;
+    if(x>y){a.v++;b.d++;a.pts+=3;} else if(y>x){b.v++;a.d++;b.pts+=3;} else {a.e++;b.e++;a.pts++;b.pts++;}
+  });
+  const rows = Object.values(stats).sort((a,b)=>b.pts-a.pts||(b.gp-b.gc)-(a.gp-a.gc)||b.gp-a.gp);
+  wrap.appendChild(h(`<h3>Tabela</h3>`));
+  const table = h(`<table><thead><tr><th>#</th><th>Time</th><th>J</th><th>V</th><th>E</th><th>D</th><th>SG</th><th>Pts</th></tr></thead><tbody></tbody></table>`);
+  const tb = table.querySelector('tbody');
+  rows.forEach((r,i)=> tb.appendChild(h(`<tr><td>${i+1}</td><td>${r.nome}</td><td>${r.j}</td><td>${r.v}</td><td>${r.e}</td><td>${r.d}</td><td>${r.gp-r.gc}</td><td><b>${r.pts}</b></td></tr>`)));
+  const tw = h('<div class="table-wrap" style="margin-bottom:20px;"></div>');
+  tw.appendChild(table);
+  wrap.appendChild(tw);
+  wrap.appendChild(h(`<h3>Jogos</h3>`));
+  const list = h('<div class="grid" style="grid-template-columns:repeat(auto-fill,minmax(220px,1fr));margin-bottom:20px;"></div>');
+  matches.forEach(m=> list.appendChild(renderMatchCard(t, m, 1)));
+  wrap.appendChild(list);
+  return wrap;
+}
+
+/* ---- times ---- */
+function renderTimes(view){
+  view.appendChild(h(`<div class="section-title"><h1 style="font-size:34px;margin:0;">Participantes</h1></div>`));
+  view.appendChild(h(`<div class="muted" style="margin:-8px 0 20px;">Cada jogador entra nos campeonatos usando seu próprio nome de usuário — a inscrição acontece direto na página do campeonato.</div>`));
+
+  if(state.times.length===0){ view.appendChild(h(`<div class="empty">Ninguém se inscreveu em nenhum campeonato ainda.</div>`)); return; }
+  const grid = h(`<div class="grid"></div>`);
+  state.times.forEach((tm,i)=>{
+    const theme = gameTheme(tm.jogo);
+    const souDono = state.user && state.user.id===tm.dono;
+    const card = h(`<div class="card" style="animation-delay:${i*0.05}s;">
+      <div class="banner banner-sm" style="background:${theme.grad}">${gameIconHTML(tm.jogo)}</div>
+      <div class="card-body">
+        <span class="tag">${tm.jogo}</span>
+        <h3>${tm.nome}</h3>
+        <div class="muted">${souDono ? 'Você' : 'Jogador do site'}</div>
+      </div>
+    </div>`);
+    if(state.user && (souDono || state.user.role==='admin')){
+      const del = h(`<button class="btn btn-danger" style="margin-top:12px;width:100%;">Remover inscrição</button>`);
+      del.onclick = async ()=>{
+        if(!confirm('Remover essa inscrição?')) return;
+        await excluirTime(tm.id);
+        render();
+      };
+      card.querySelector('.card-body').appendChild(del);
+    }
+    grid.appendChild(card);
+  });
+  view.appendChild(grid);
+}
+
+/* ---- ranking ---- */
+function renderRanking(view){
+  view.appendChild(h(`<div class="section-title"><h1 style="font-size:34px;margin:0;">Ranking</h1></div>`));
+  const jogoFiltro = state._rankJogo || 'Todos';
+  const tabs = h(`<div class="tabs-inline"></div>`);
+  ['Todos', ...JOGOS].forEach(g=>{
+    const b = h(`<button class="${jogoFiltro===g?'active':''}">${g}</button>`);
+    b.onclick = ()=>{ state._rankJogo=g; render(); };
+    tabs.appendChild(b);
+  });
+  view.appendChild(tabs);
+
+  const stats = {};
+  state.torneios.forEach(t=>{
+    if(!t.partidas) return;
+    if(jogoFiltro!=='Todos' && t.jogo!==jogoFiltro) return;
+    t.partidas.forEach(m=>{
+      if(!m.vencedor || !m.timeA || !m.timeB) return;
+      [m.timeA, m.timeB].forEach(tm=>{
+        if(!stats[tm.id]) stats[tm.id] = {nome:tm.nome, jogo:t.jogo, v:0, d:0};
+      });
+      const perdedor = m.vencedor.id===m.timeA.id ? m.timeB : m.timeA;
+      stats[m.vencedor.id].v++;
+      stats[perdedor.id].d++;
+    });
+  });
+  const rows = Object.values(stats).sort((a,b)=>b.v-a.v || a.d-b.d);
+  if(rows.length===0){ view.appendChild(h(`<div class="empty">Ainda não há partidas concluídas para gerar ranking.</div>`)); return; }
+
+  function nivelDoTime(v){
+    if(v>=10) return {cls:'nivel-diamante', label:'Diamante'};
+    if(v>=5)  return {cls:'nivel-ouro', label:'Ouro'};
+    if(v>=2)  return {cls:'nivel-prata', label:'Prata'};
+    return {cls:'nivel-bronze', label:'Bronze'};
+  }
+
+  if(rows.length>=2){
+    const podium = h('<div class="podium"></div>');
+    const medals = ['1','2','3'];
+    const classes = ['first','second','third'];
+    rows.slice(0,3).forEach((r,i)=>{
+      podium.appendChild(h(`<div class="podium-spot ${classes[i]}" style="animation-delay:${i*0.08}s;">
+        <span class="medal">${medals[i]}</span>
+        <div class="nome">${r.nome}</div>
+        <div class="muted" style="font-size:12px;">${r.jogo}</div>
+        <div class="vit">${r.v} vitórias</div>
+      </div>`));
+    });
+    view.appendChild(podium);
+  }
+
+  const table = h(`<table><thead><tr><th>#</th><th>Time</th><th>Jogo</th><th>Nível</th><th>Vitórias</th><th>Derrotas</th></tr></thead><tbody></tbody></table>`);
+  const tbody = table.querySelector('tbody');
+  rows.forEach((r,i)=>{
+    const nv = nivelDoTime(r.v);
+    tbody.appendChild(h(`<tr><td>${i+1}</td><td>${r.nome}</td><td>${r.jogo}</td><td><span class="nivel-badge ${nv.cls}">${nv.label}</span></td><td>${r.v}</td><td>${r.d}</td></tr>`));
+  });
+  const wrapTable = h('<div class="table-wrap"></div>');
+  wrapTable.appendChild(table);
+  view.appendChild(wrapTable);
+}
+
+/* ---- perfil ---- */
+function renderPerfil(view){
+  view.appendChild(h(`<div class="section-title"><h1 style="font-size:34px;margin:0;">Meu perfil</h1></div>`));
+
+  const card = h(`<div class="form-box" style="margin-bottom:24px;"><h3 style="margin-top:0;">Dados da conta</h3></div>`);
+  card.appendChild(h(`<div class="field"><label>E-mail</label><input value="${state.user.email}" disabled/></div>`));
+  card.appendChild(h(`<div class="field"><label>Nome de exibição</label><input id="pNome" value="${state.user.nome}"/></div>`));
+  const saveBtn = h(`<button class="btn btn-gold" style="width:100%;">Salvar nome</button>`);
+  saveBtn.onclick = async ()=>{
+    const novoNome = document.getElementById('pNome').value.trim();
+    if(!novoNome){ toast('Digite um nome'); return; }
+    const { error } = await db.auth.updateUser({ data: { nome: novoNome } });
+    if(error){ toast('Erro ao salvar'); return; }
+    await refreshUser();
+    toast('Nome atualizado!');
+    render();
+  };
+  card.appendChild(saveBtn);
+  view.appendChild(card);
+
+  const themeCard = h(`<div class="form-box"><h3 style="margin-top:0;">Tema do site</h3></div>`);
+  themeCard.appendChild(h(`<div class="muted" style="margin-top:-8px;margin-bottom:10px;">Escolha a cor de destaque do site (fica salva na sua conta).</div>`));
+  const swatchWrap = h(`<div style="display:flex;gap:12px;flex-wrap:wrap;"></div>`);
+  Object.entries(THEME_PRESETS).forEach(([key,val])=>{
+    const ativo = (state.user.tema||'verde')===key;
+    const dot = h(`<button title="${val.label}" style="width:38px;height:38px;border-radius:50%;border:2px solid ${ativo?'#fff':'transparent'};background:${val.gold};cursor:pointer;box-shadow:${ativo?'0 0 0 2px rgba(255,255,255,.25)':'none'};"></button>`);
+    dot.onclick = async ()=>{
+      applyTema(key);
+      const { error } = await db.auth.updateUser({ data: { tema: key } });
+      if(error){ toast('Erro ao salvar tema'); return; }
+      await refreshUser();
+      toast('Tema atualizado!');
+      render();
+    };
+    swatchWrap.appendChild(dot);
+  });
+  themeCard.appendChild(swatchWrap);
+  view.appendChild(themeCard);
+
+  const avatarCard = h(`<div class="form-box" style="margin-top:24px;"><h3 style="margin-top:0;">Foto de perfil</h3></div>`);
+  avatarCard.appendChild(h(`<div class="muted" style="margin-top:-8px;margin-bottom:14px;">Use uma foto sua. Se não enviar, mostramos suas iniciais.</div>`));
+  const previewWrap = h(`<div style="display:flex;align-items:center;gap:16px;margin-bottom:16px;flex-wrap:wrap;"></div>`);
+  previewWrap.innerHTML = avatarHTML(state.user, 'avatar-lg');
+  avatarCard.appendChild(previewWrap);
+
+  const fileField = h(`<div class="field"><label>Enviar foto do dispositivo</label><input id="pFoto" type="file" accept="image/*"/></div>`);
+  avatarCard.appendChild(fileField);
+
+  const urlField = h(`<div class="field"><label>Ou cole o link de uma imagem</label><input id="pFotoUrl" type="url" placeholder="https://..." value="${isPhotoAvatar(state.user.avatar) && !String(state.user.avatar).startsWith('data:') ? state.user.avatar : ''}"/></div>`);
+  avatarCard.appendChild(urlField);
+
+  const avActions = h(`<div style="display:flex;gap:10px;flex-wrap:wrap;"></div>`);
+  const saveFotoBtn = h(`<button class="btn btn-gold">Salvar foto</button>`);
+  const removeFotoBtn = h(`<button class="btn btn-ghost">Remover foto</button>`);
+
+  async function saveAvatar(value){
+    const { error } = await db.auth.updateUser({ data: { avatar: value } });
+    if(error){ toast('Erro ao salvar foto (arquivo muito grande?)'); return false; }
+    await refreshUser();
+    toast(value ? 'Foto atualizada!' : 'Foto removida');
+    render();
+    return true;
+  }
+
+  saveFotoBtn.onclick = async ()=>{
+    const fileInput = document.getElementById('pFoto');
+    const urlInput = document.getElementById('pFotoUrl');
+    if(fileInput.files && fileInput.files[0]){
+      const file = fileInput.files[0];
+      if(file.size > 2.5*1024*1024){ toast('Escolha uma imagem menor que 2,5 MB'); return; }
+      try{
+        const dataUrl = await resizeImageToDataURL(file, 256);
+        await saveAvatar(dataUrl);
+      }catch(e){
+        console.error(e);
+        toast('Não foi possível processar a imagem');
+      }
+      return;
+    }
+    const url = (urlInput.value||'').trim();
+    if(url){
+      if(!/^https?:\/\//i.test(url)){ toast('O link precisa começar com http:// ou https://'); return; }
+      await saveAvatar(url);
+      return;
+    }
+    toast('Escolha um arquivo ou cole um link');
+  };
+  removeFotoBtn.onclick = async ()=>{
+    if(!state.user.avatar){ toast('Você já está sem foto'); return; }
+    await saveAvatar(null);
+  };
+  avActions.appendChild(saveFotoBtn);
+  avActions.appendChild(removeFotoBtn);
+  avatarCard.appendChild(avActions);
+  view.appendChild(avatarCard);
+
+  // histórico pessoal
+  const meusTimes = state.times.filter(tm=>tm.dono===state.user.id);
+  const meusIds = new Set(meusTimes.map(tm=>tm.id));
+  const historico = [];
+  state.torneios.forEach(t=>{
+    const meuId = meusTimes.find(tm=>tm.jogo===t.jogo)?.id;
+    if(!meuId || !(t.times||[]).includes(meuId)) return;
+    let v=0, d=0;
+    (t.partidas||[]).forEach(m=>{
+      if(!m.vencedor) return;
+      if(m.timeA && m.timeA.id===meuId){ m.vencedor.id===meuId ? v++ : d++; }
+      else if(m.timeB && m.timeB.id===meuId){ m.vencedor.id===meuId ? v++ : d++; }
+    });
+    historico.push({torneio:t, v, d});
+  });
+  view.appendChild(h(`<h3 style="margin-top:28px;">Meu histórico</h3>`));
+  if(historico.length===0){
+    view.appendChild(h(`<div class="empty">Você ainda não participou de nenhum campeonato.</div>`));
+  } else {
+    const table = h(`<table><thead><tr><th>Campeonato</th><th>Jogo</th><th>Status</th><th>Vitórias</th><th>Derrotas</th></tr></thead><tbody></tbody></table>`);
+    const statusLabel = {aberto:'Inscrições abertas', andamento:'Em andamento', finalizado:'Finalizado'};
+    const tbody = table.querySelector('tbody');
+    historico.forEach(hst=>{
+      tbody.appendChild(h(`<tr><td>${hst.torneio.nome}</td><td>${hst.torneio.jogo}</td><td>${statusLabel[hst.torneio.status]}</td><td>${hst.v}</td><td>${hst.d}</td></tr>`));
+    });
+    const wrapT = h('<div class="table-wrap"></div>');
+    wrapT.appendChild(table);
+    view.appendChild(wrapT);
+  }
+}
+
+/* ---- admin ---- */
+function renderAdmin(view){
+  if(!state.user || state.user.role!=='admin'){
+    view.appendChild(h(`<div class="empty">Acesso restrito a administradores.</div>`));
+    return;
+  }
+
+  // Admin sub-nav
+  const tabs = [
+    ['dashboard','Painel'],
+    ['criar','Novo campeonato'],
+    ['lista','Campeonatos'],
+    ['participantes','Participantes']
+  ];
+  const sub = h(`<div class="admin-nav"></div>`);
+  tabs.forEach(([id,label])=>{
+    const b = h(`<button class="${state.adminTab===id?'active':''}">${label}</button>`);
+    b.onclick = ()=>{ state.adminTab=id; if(id!=='criar') state.wizard=null; render(); };
+    sub.appendChild(b);
+  });
+  view.appendChild(sub);
+
+  if(state.adminTab==='dashboard') return renderAdminDashboard(view);
+  if(state.adminTab==='criar') return renderAdminWizard(view);
+  if(state.adminTab==='lista') return renderAdminLista(view);
+  if(state.adminTab==='participantes') return renderAdminParticipantes(view);
+}
+
+function renderAdminDashboard(view){
+  view.appendChild(h(`<div class="section-title"><h1 style="font-size:32px;margin:0;">Painel do admin</h1></div>`));
+  const abertos = state.torneios.filter(t=>t.status==='aberto').length;
+  const andamento = state.torneios.filter(t=>t.status==='andamento').length;
+  const fin = state.torneios.filter(t=>t.status==='finalizado').length;
+  const stats = h(`<div class="admin-stats"></div>`);
+  [
+    [state.torneios.length,'Campeonatos'],
+    [abertos,'Inscrições abertas'],
+    [andamento,'Em andamento'],
+    [fin,'Finalizados'],
+    [state.times.length,'Participantes']
+  ].forEach(([n,l])=>{
+    stats.appendChild(h(`<div class="admin-stat"><b>${n}</b><span>${l}</span></div>`));
+  });
+  view.appendChild(stats);
+
+  const actions = h(`<div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:28px;"></div>`);
+  const newBtn = h(`<button class="btn btn-gold">Criar campeonato</button>`);
+  newBtn.onclick = ()=>{ state.adminTab='criar'; state.wizard=null; render(); };
+  actions.appendChild(newBtn);
+  const listBtn = h(`<button class="btn btn-ghost">Ver campeonatos</button>`);
+  listBtn.onclick = ()=>{ state.adminTab='lista'; render(); };
+  actions.appendChild(listBtn);
+  view.appendChild(actions);
+
+  // recent tournaments
+  view.appendChild(h(`<h3>Campeonatos recentes</h3>`));
+  if(!state.torneios.length){
+    view.appendChild(h(`<div class="empty">Nenhum campeonato ainda. Crie o primeiro.</div>`));
+  } else {
+    const statusLabel = {aberto:'Inscrições abertas', andamento:'Em andamento', finalizado:'Finalizado'};
+    const fmtLabel = {mata_mata:'Mata-mata', grupos_mata_mata:'Grupos + MM', pontos:'Pontos', dupla_eliminacao:'Dupla elim.'};
+    const table = h(`<table><thead><tr><th>Nome</th><th>Jogo</th><th>Formato</th><th>Status</th><th>Times</th></tr></thead><tbody></tbody></table>`);
+    const tb = table.querySelector('tbody');
+    [...state.torneios].reverse().slice(0,8).forEach(t=>{
+      const tr = h(`<tr style="cursor:pointer;">
+        <td>${t.nome}</td><td>${t.jogo}</td>
+        <td>${fmtLabel[t.formato]||'Mata-mata'}</td>
+        <td><span class="tag status-${t.status}" style="margin:0;">${statusLabel[t.status]}</span></td>
+        <td>${(t.times||[]).length}</td>
+      </tr>`);
+      tr.onclick = ()=>{ state.tab='torneios'; state.torneioAtivo=t.id; render(); };
+      tb.appendChild(tr);
+    });
+    const tw = h('<div class="table-wrap"></div>');
+    tw.appendChild(table);
+    view.appendChild(tw);
+  }
+
+  view.appendChild(h(`<div class="card" style="margin-top:28px;"><div class="card-body">
+    <h3 style="margin-top:0;">Como promover um admin</h3>
+    <p class="muted" style="margin:0;">Peça pro jogador criar a conta. No Supabase: <b>Authentication → Users</b>, copie o ID e adicione na tabela <b>admins</b>.</p>
+  </div></div>`));
+}
+
+function defaultWizard(){
+  return {
+    step: 1,
+    nome: '',
+    jogo: JOGOS[0],
+    data_inicio: '',
+    regras: '',
+    formato: 'mata_mata',
+    numGrupos: 4,
+    classificadosPorGrupo: 2,
+    idaVolta: false,
+    inscricaoAberta: true,
+    selectedTimes: [],
+    novosNomes: ''
+  };
+}
+
+function renderAdminWizard(view){
+  if(!state.wizard) state.wizard = defaultWizard();
+  const w = state.wizard;
+
+  view.appendChild(h(`<div class="section-title"><h1 style="font-size:32px;margin:0;">Novo campeonato</h1></div>`));
+
+  // steps indicator
+  const steps = ['Info','Formato','Participantes','Revisar'];
+  const ind = h(`<div class="wizard-steps"></div>`);
+  steps.forEach((label,i)=>{
+    const n = i+1;
+    const cls = n===w.step ? 'active' : (n<w.step ? 'done' : '');
+    ind.appendChild(h(`<div class="wizard-step ${cls}"><span class="num">${n}</span><span class="lab">${label}</span></div>`));
+    if(i<steps.length-1) ind.appendChild(h(`<div class="wizard-line ${n<w.step?'done':''}"></div>`));
+  });
+  view.appendChild(ind);
+
+  const box = h(`<div class="form-box" style="max-width:640px;width:100%;"></div>`);
+
+  if(w.step===1){
+    box.appendChild(h(`<h3 style="margin-top:0;">Informações básicas</h3>`));
+    box.appendChild(h(`<div class="field"><label>Nome do campeonato</label><input id="wNome" value="${w.nome.replace(/"/g,'&quot;')}" placeholder="Ex: Copa e-Expedition FIFA"/></div>`));
+    box.appendChild(h(`<div class="field"><label>Jogo</label><select id="wJogo">${JOGOS.map(g=>`<option ${g===w.jogo?'selected':''}>${g}</option>`).join('')}</select></div>`));
+    box.appendChild(h(`<div class="field"><label>Data/hora de início (opcional)</label><input id="wData" type="datetime-local" value="${w.data_inicio}"/></div>`));
+    box.appendChild(h(`<div class="field"><label>Regras / Edital (opcional)</label><textarea id="wRegras" rows="4" style="width:100%;background:rgba(255,255,255,.04);border:1px solid var(--border);color:var(--text);padding:11px 14px;border-radius:var(--radius-sm);font-size:14.5px;font-family:inherit;">${w.regras}</textarea></div>`));
+  }
+
+  if(w.step===2){
+    box.appendChild(h(`<h3 style="margin-top:0;">Formato do torneio</h3>`));
+    box.appendChild(h(`<p class="muted" style="margin-top:-6px;margin-bottom:16px;">Escolha como as partidas vão funcionar — estilo plataformas gamer.</p>`));
+    const grid = h(`<div class="format-grid"></div>`);
+    FORMATOS.forEach(f=>{
+      const card = h(`<button type="button" class="format-card ${w.formato===f.id?'active':''}">
+        <span class="format-icon">${f.icon}</span>
+        <strong>${f.nome}</strong>
+        <span class="muted">${f.desc}</span>
+      </button>`);
+      card.onclick = ()=>{ w.formato=f.id; render(); };
+      grid.appendChild(card);
+    });
+    box.appendChild(grid);
+
+    if(w.formato==='grupos_mata_mata'){
+      box.appendChild(h(`<div class="field" style="margin-top:18px;"><label>Número de grupos</label><select id="wGrupos">${[2,3,4,5,6,8].map(n=>`<option ${n===w.numGrupos?'selected':''}>${n}</option>`).join('')}</select></div>`));
+      box.appendChild(h(`<div class="field"><label>Classificados por grupo</label><select id="wClass">${[1,2,3,4].map(n=>`<option ${n===w.classificadosPorGrupo?'selected':''}>${n}</option>`).join('')}</select></div>`));
+    }
+    if(w.formato==='grupos_mata_mata' || w.formato==='pontos'){
+      const check = h(`<label class="check-row"><input type="checkbox" id="wIda" ${w.idaVolta?'checked':''}/> Jogos de ida e volta</label>`);
+      box.appendChild(check);
+    }
+  }
+
+  if(w.step===3){
+    box.appendChild(h(`<h3 style="margin-top:0;">Participantes</h3>`));
+    box.appendChild(h(`<p class="muted" style="margin-top:-6px;margin-bottom:14px;">Selecione times já cadastrados e/ou adicione nomes manualmente. Você também pode deixar as inscrições abertas no site.</p>`));
+
+    const openRow = h(`<label class="check-row"><input type="checkbox" id="wOpen" ${w.inscricaoAberta?'checked':''}/> Manter inscrições abertas no site (jogadores podem entrar depois)</label>`);
+    box.appendChild(openRow);
+
+    const doJogo = state.times.filter(tm=>tm.jogo===w.jogo);
+    box.appendChild(h(`<div class="field" style="margin-top:16px;"><label>Times do jogo ${w.jogo} (${doJogo.length})</label></div>`));
+    if(doJogo.length===0){
+      box.appendChild(h(`<div class="muted" style="margin-bottom:12px;">Nenhum time deste jogo cadastrado ainda.</div>`));
+    } else {
+      const list = h(`<div class="pick-list"></div>`);
+      doJogo.forEach(tm=>{
+        const on = w.selectedTimes.includes(tm.id);
+        const row = h(`<label class="pick-item ${on?'on':''}"><input type="checkbox" ${on?'checked':''}/> <span>${tm.nome}</span></label>`);
+        row.querySelector('input').onchange = (e)=>{
+          if(e.target.checked) w.selectedTimes = [...w.selectedTimes, tm.id];
+          else w.selectedTimes = w.selectedTimes.filter(x=>x!==tm.id);
+          render();
+        };
+        list.appendChild(row);
+      });
+      box.appendChild(list);
+    }
+
+    box.appendChild(h(`<div class="field" style="margin-top:16px;"><label>Adicionar participantes manuais (um nome por linha)</label>
+      <textarea id="wNovos" rows="4" placeholder="Time Alpha&#10;Time Beta&#10;Fulano">${w.novosNomes}</textarea></div>`));
+  }
+
+  if(w.step===4){
+    const fmt = FORMATOS.find(f=>f.id===w.formato) || FORMATOS[0];
+    const manuais = (w.novosNomes||'').split('\n').map(s=>s.trim()).filter(Boolean);
+    const total = w.selectedTimes.length + manuais.length;
+    box.appendChild(h(`<h3 style="margin-top:0;">Revisar e criar</h3>`));
+    box.appendChild(h(`<div class="review-grid">
+      <div><span class="muted">Nome</span><b>${w.nome||'—'}</b></div>
+      <div><span class="muted">Jogo</span><b>${w.jogo}</b></div>
+      <div><span class="muted">Formato</span><b>${fmt.nome}</b></div>
+      <div><span class="muted">Participantes</span><b>${total}${w.inscricaoAberta?' + inscrições abertas':''}</b></div>
+      <div><span class="muted">Início</span><b>${w.data_inicio ? new Date(w.data_inicio).toLocaleString('pt-BR') : 'Não definido'}</b></div>
+    </div>`));
+    if(w.formato==='grupos_mata_mata'){
+      box.appendChild(h(`<p class="muted">${w.numGrupos} grupos · ${w.classificadosPorGrupo} classificados por grupo${w.idaVolta?' · ida e volta':''}</p>`));
+    }
+    if(total < 2 && !w.inscricaoAberta){
+      box.appendChild(h(`<div class="empty" style="padding:16px;margin-top:12px;">Precisa de pelo menos 2 participantes ou deixar inscrições abertas.</div>`));
+    }
+  }
+
+  // nav buttons
+  const nav = h(`<div class="wizard-nav"></div>`);
+  if(w.step>1){
+    const back = h(`<button class="btn btn-ghost">Voltar</button>`);
+    back.onclick = ()=>{ saveWizardFields(w); w.step--; render(); };
+    nav.appendChild(back);
+  } else {
+    nav.appendChild(h(`<span></span>`));
+  }
+  if(w.step<4){
+    const next = h(`<button class="btn btn-gold">Continuar</button>`);
+    next.onclick = ()=>{
+      if(!saveWizardFields(w)) return;
+      if(w.step===1 && !w.nome.trim()){ toast('Dê um nome ao campeonato'); return; }
+      w.step++;
+      render();
+    };
+    nav.appendChild(next);
+  } else {
+    const create = h(`<button class="btn btn-gold">Criar campeonato</button>`);
+    create.onclick = ()=> criarDoWizard(w);
+    nav.appendChild(create);
+  }
+  box.appendChild(nav);
+  view.appendChild(box);
+}
+
+function saveWizardFields(w){
+  const nome = document.getElementById('wNome');
+  if(nome) w.nome = nome.value;
+  const jogo = document.getElementById('wJogo');
+  if(jogo) w.jogo = jogo.value;
+  const data = document.getElementById('wData');
+  if(data) w.data_inicio = data.value;
+  const regras = document.getElementById('wRegras');
+  if(regras) w.regras = regras.value;
+  const g = document.getElementById('wGrupos');
+  if(g) w.numGrupos = Number(g.value);
+  const c = document.getElementById('wClass');
+  if(c) w.classificadosPorGrupo = Number(c.value);
+  const ida = document.getElementById('wIda');
+  if(ida) w.idaVolta = ida.checked;
+  const open = document.getElementById('wOpen');
+  if(open) w.inscricaoAberta = open.checked;
+  const novos = document.getElementById('wNovos');
+  if(novos) w.novosNomes = novos.value;
+  return true;
+}
+
+async function criarDoWizard(w){
+  saveWizardFields(w);
+  if(!w.nome.trim()){ toast('Dê um nome ao campeonato'); return; }
+  const manuais = (w.novosNomes||'').split('\n').map(s=>s.trim()).filter(Boolean);
+  // create manual times
+  const timeIds = [...w.selectedTimes];
+  for(const nome of manuais){
+    const { data, error } = await db.from('times').insert({nome, jogo:w.jogo, jogadores:[], dono: state.user.id}).select().single();
+    if(error){ console.error(error); toast('Erro ao criar participante '+nome); return; }
+    timeIds.push(data.id);
+  }
+  if(timeIds.length < 2 && !w.inscricaoAberta){
+    toast('Precisa de pelo menos 2 participantes ou inscrições abertas');
+    return;
+  }
+  await loadTimes();
+
+  const payload = {
+    nome: w.nome.trim(),
+    jogo: w.jogo,
+    data_inicio: w.data_inicio ? new Date(w.data_inicio).toISOString() : null,
+    regras: w.regras||'',
+    status: w.inscricaoAberta ? 'aberto' : 'aberto',
+    times: timeIds,
+    formato: w.formato,
+    config: {
+      numGrupos: w.numGrupos,
+      classificadosPorGrupo: w.classificadosPorGrupo,
+      idaVolta: w.idaVolta
+    },
+    grupos: null,
+    partidas: null
+  };
+
+  // se não quer inscrição aberta e já tem times, pode iniciar já
+  const created = await criarTorneio(payload);
+  if(!created) return;
+  await loadTorneios();
+
+  if(!w.inscricaoAberta && timeIds.length>=2){
+    const t = state.torneios.slice().reverse().find(x=>x.nome===payload.nome && x.jogo===payload.jogo);
+    if(t){
+      t.formato = payload.formato;
+      t.config = payload.config;
+      t.times = timeIds;
+      const timesObjs = timeIds.map(id=>state.times.find(x=>x.id===id)).filter(Boolean);
+      iniciarTorneioComFormato(t, timesObjs);
+      await saveTorneio(t);
+    }
+  }
+
+  state.wizard = null;
+  state.adminTab = 'lista';
+  toast('Campeonato criado!');
+  render();
+}
+
+function renderAdminLista(view){
+  view.appendChild(h(`<div class="section-title"><h1 style="font-size:32px;margin:0;">Campeonatos</h1>
+    <button class="btn btn-gold" id="adminNewBtn">Novo</button></div>`));
+  document.getElementById('adminNewBtn').onclick = ()=>{ state.adminTab='criar'; state.wizard=null; render(); };
+
+  const statusLabel = {aberto:'Inscrições abertas', andamento:'Em andamento', finalizado:'Finalizado'};
+  const fmtLabel = {mata_mata:'Mata-mata', grupos_mata_mata:'Grupos + MM', pontos:'Pontos', dupla_eliminacao:'Dupla elim.'};
+
+  if(!state.torneios.length){
+    view.appendChild(h(`<div class="empty">Nenhum campeonato criado ainda.</div>`));
+    return;
+  }
+  const table = h(`<table><thead><tr><th>Nome</th><th>Jogo</th><th>Formato</th><th>Status</th><th>Times</th><th>Ações</th></tr></thead><tbody></tbody></table>`);
+  const tbody = table.querySelector('tbody');
+  state.torneios.forEach(t=>{
+    const tr = h(`<tr>
+      <td>${t.nome}</td>
+      <td>${t.jogo}</td>
+      <td>${fmtLabel[t.formato]||'Mata-mata'}</td>
+      <td><span class="tag status-${t.status}" style="margin:0;">${statusLabel[t.status]}</span></td>
+      <td>${(t.times||[]).length}</td>
+    </tr>`);
+    const acoesTd = h(`<td></td>`);
+    const wrapBtns = h(`<div style="display:flex;gap:6px;flex-wrap:wrap;"></div>`);
+    const openBtn = h(`<button class="btn btn-ghost" style="padding:6px 12px;font-size:12.5px;">Abrir</button>`);
+    openBtn.onclick = ()=>{ state.tab='torneios'; state.torneioAtivo=t.id; render(); };
+    wrapBtns.appendChild(openBtn);
+    if(t.status==='aberto'){
+      const genBtn = h(`<button class="btn btn-gold" style="padding:6px 12px;font-size:12.5px;">Iniciar</button>`);
+      genBtn.disabled = (t.times||[]).length < 2;
+      genBtn.onclick = async ()=>{
+        const timesObjs = t.times.map(id=>state.times.find(x=>x.id===id)).filter(Boolean);
+        iniciarTorneioComFormato(t, timesObjs);
+        await saveTorneio(t);
+        toast('Torneio iniciado!');
+        render();
+      };
+      wrapBtns.appendChild(genBtn);
+    }
+    if(t.status==='andamento'){
+      const finBtn = h(`<button class="btn btn-ghost" style="padding:6px 12px;font-size:12.5px;">Finalizar</button>`);
+      finBtn.onclick = async ()=>{ t.status='finalizado'; await saveTorneio(t); toast('Finalizado'); render(); };
+      wrapBtns.appendChild(finBtn);
+    }
+    const delBtn = h(`<button class="btn btn-danger" style="padding:6px 12px;font-size:12.5px;">Excluir</button>`);
+    delBtn.onclick = async ()=>{
+      if(!confirm(`Excluir "${t.nome}"?`)) return;
+      await excluirTorneio(t.id);
+      toast('Excluído');
+      render();
+    };
+    wrapBtns.appendChild(delBtn);
+    acoesTd.appendChild(wrapBtns);
+    tr.appendChild(acoesTd);
+    tbody.appendChild(tr);
+  });
+  const wrapTable = h('<div class="table-wrap"></div>');
+  wrapTable.appendChild(table);
+  view.appendChild(wrapTable);
+}
+
+function renderAdminParticipantes(view){
+  view.appendChild(h(`<div class="section-title"><h1 style="font-size:32px;margin:0;">Participantes</h1></div>`));
+  view.appendChild(h(`<p class="muted" style="margin-top:-8px;margin-bottom:18px;">Todos os times/jogadores cadastrados no site.</p>`));
+
+  // quick add
+  const addBox = h(`<div class="form-box" style="max-width:480px;margin-bottom:24px;"><h3 style="margin-top:0;">Adicionar participante</h3></div>`);
+  addBox.appendChild(h(`<div class="field"><label>Nome</label><input id="apNome" placeholder="Nome do time ou jogador"/></div>`));
+  addBox.appendChild(h(`<div class="field"><label>Jogo</label><select id="apJogo">${JOGOS.map(g=>`<option>${g}</option>`).join('')}</select></div>`));
+  const addBtn = h(`<button class="btn btn-gold">Cadastrar</button>`);
+  addBtn.onclick = async ()=>{
+    const nome = document.getElementById('apNome').value.trim();
+    if(!nome){ toast('Digite um nome'); return; }
+    const jogo = document.getElementById('apJogo').value;
+    const { error } = await db.from('times').insert({nome, jogo, jogadores:[], dono: state.user.id});
+    if(error){ toast('Erro ao cadastrar'); return; }
+    await loadTimes();
+    toast('Participante adicionado');
+    render();
+  };
+  addBox.appendChild(addBtn);
+  view.appendChild(addBox);
+
+  if(!state.times.length){
+    view.appendChild(h(`<div class="empty">Nenhum participante ainda.</div>`));
+    return;
+  }
+  const table2 = h(`<table><thead><tr><th>Nome</th><th>Jogo</th><th>Ações</th></tr></thead><tbody></tbody></table>`);
+  const tbody2 = table2.querySelector('tbody');
+  state.times.forEach(tm=>{
+    const tr = h(`<tr><td>${tm.nome}</td><td>${tm.jogo}</td></tr>`);
+    const acoesTd = h(`<td></td>`);
+    const delBtn = h(`<button class="btn btn-danger" style="padding:6px 12px;font-size:12.5px;">Remover</button>`);
+    delBtn.onclick = async ()=>{
+      if(!confirm(`Remover "${tm.nome}"?`)) return;
+      await excluirTime(tm.id);
+      toast('Removido');
+      render();
+    };
+    acoesTd.appendChild(delBtn);
+    tr.appendChild(acoesTd);
+    tbody2.appendChild(tr);
+  });
+  const wrapTable2 = h('<div class="table-wrap"></div>');
+  wrapTable2.appendChild(table2);
+  view.appendChild(wrapTable2);
+}
+
+/* ================= boot ================= */
+(async function boot(){
+  const view = document.getElementById('view');
+  view.innerHTML = '<div class="empty">Carregando…</div>';
+  try{
+    if(!window.supabase){
+      throw new Error('A biblioteca do Supabase não carregou. Verifique sua conexão ou desative bloqueadores de anúncio/rastreador para este site e recarregue a página.');
+    }
+    db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    await loadAll();
+    const params = new URLSearchParams(window.location.search);
+    const torneioLink = params.get('torneio');
+    if(torneioLink && state.torneios.find(x=>x.id===torneioLink)){
+      state.torneioAtivo = torneioLink;
+    }
+    setupScrollEffects();
+    render();
+  }catch(err){
+    console.error(err);
+    view.innerHTML = '<div class="empty">⚠️ Erro ao carregar o site.<br><br>'+(err && err.message ? err.message : String(err))+'</div>';
+  }
+})();
+</script>
+</body>
+</html>
