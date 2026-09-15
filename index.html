@@ -2,8 +2,28 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>e-Expedition — Campeonatos</title>
+<meta name="description" content="Campeonatos online, chaveamentos ao vivo, ExpdCoin e comunidade gamer. Inscreva-se e acompanhe em tempo real.">
+<meta name="theme-color" content="#C6FF1A">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="e-Expedition">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="apple-touch-icon" href="/fundo-hero.jpg">
+<!-- Open Graph / Discord -->
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="e-Expedition">
+<meta property="og:title" content="e-Expedition — Campeonatos">
+<meta property="og:description" content="Campeonatos online, chaveamentos ao vivo e ExpdCoin. Entre e jogue.">
+<meta property="og:image" content="https://e-expedition.tio-kidosenpai.workers.dev/fundo-hero.jpg">
+<meta property="og:url" content="https://e-expedition.tio-kidosenpai.workers.dev/">
+<meta property="og:locale" content="pt_BR">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="e-Expedition — Campeonatos">
+<meta name="twitter:description" content="Campeonatos online, chaveamentos ao vivo e ExpdCoin.">
+<meta name="twitter:image" content="https://e-expedition.tio-kidosenpai.workers.dev/fundo-hero.jpg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700;800&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
@@ -1168,6 +1188,56 @@
   html[data-appearance="light"] .nav-pills button{color:var(--muted);}
   html[data-appearance="light"] .nav-pills button.active{color:#0A0A0A;}
 
+  /* notif + loja + hist */
+  .notif-wrap{position:relative;}
+  .notif-btn{
+    position:relative;width:40px;height:40px;border-radius:12px;
+    border:1px solid var(--border);background:var(--surface);color:var(--text);
+    display:inline-flex;align-items:center;justify-content:center;font-size:16px;
+  }
+  .notif-btn:hover{border-color:var(--border-strong);}
+  .notif-badge{
+    position:absolute;top:-4px;right:-4px;min-width:18px;height:18px;padding:0 5px;
+    border-radius:99px;background:var(--loss);color:#fff;font-size:10px;font-weight:800;
+    display:flex;align-items:center;justify-content:center;line-height:1;
+  }
+  .notif-panel{
+    position:absolute;right:0;top:calc(100% + 8px);width:min(340px,92vw);
+    max-height:380px;overflow:auto;z-index:80;
+    background:var(--surface-solid);border:1px solid var(--border-strong);
+    border-radius:var(--radius);box-shadow:var(--shadow);padding:8px;
+  }
+  .notif-item{
+    padding:10px 12px;border-radius:12px;cursor:pointer;border:1px solid transparent;
+  }
+  .notif-item:hover{background:rgba(255,255,255,.04);}
+  .notif-item.unread{background:rgba(198,255,26,.06);border-color:rgba(198,255,26,.15);}
+  .notif-item .n-title{font-weight:700;font-size:13.5px;margin:0 0 2px;}
+  .notif-item .n-body{font-size:12.5px;color:var(--muted);margin:0;}
+  .notif-item .n-time{font-size:11px;color:var(--muted);margin-top:4px;}
+  .hist-row{
+    display:flex;justify-content:space-between;gap:12px;align-items:center;
+    padding:10px 0;border-bottom:1px solid var(--border);
+  }
+  .hist-row:last-child{border-bottom:none;}
+  .hist-delta.pos{color:var(--win);font-weight:800;}
+  .hist-delta.neg{color:var(--loss);font-weight:800;}
+  .loja-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;}
+  .loja-card{padding:16px;border-radius:var(--radius);border:1px solid var(--border);background:var(--surface);}
+  .loja-card .loja-emoji{font-size:28px;margin-bottom:8px;}
+  .loja-preco{color:var(--gold);font-weight:800;font-size:15px;}
+  .pwa-banner{
+    position:fixed;bottom:18px;left:50%;transform:translateX(-50%);z-index:90;
+    display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:center;
+    padding:12px 16px;border-radius:14px;border:1px solid var(--border-strong);
+    background:var(--surface-solid);box-shadow:var(--shadow);max-width:min(420px,94vw);
+  }
+  .invite-banner{
+    margin-bottom:16px;padding:14px 16px;border-radius:var(--radius);
+    border:1px solid rgba(198,255,26,.25);background:rgba(198,255,26,.08);
+  }
+
+
 </style>
 </head>
 <body>
@@ -1324,7 +1394,17 @@ const state = {
   homeFilter: 'aberto',
   perfilId: null,       // id do perfil público sendo visto
   minigameShown: false, // evita spam na mesma sessão
+  notificacoes: [],
+  notifOpen: false,
+  expdHistorico: [],
+  lojaItens: [],
+  lojaCompras: [],
+  fromInvite: false,
+  deferredInstall: null,
+  realtimeReady: false,
 };
+let realtimeChannels = [];
+
 
 const JOGOS = ['FIFA','League of Legends','Valorant','CS2','Free Fire','Outro'];
 
@@ -1531,13 +1611,194 @@ function openPerfil(userId){
 
 async function addPontos(n, motivo){
   if(!state.user) return;
-  const novo = (Number(state.user.pontos)||0) + n;
+  const delta = Number(n)||0;
+  if(!delta) return;
+  const novo = (Number(state.user.pontos)||0) + delta;
   const { error } = await db.auth.updateUser({ data: { pontos: novo } });
   if(error){ console.error(error); toast('Não foi possível salvar pontos'); return; }
   state.user.pontos = novo;
   await upsertPerfilPublico(state.user);
-  toast((motivo||'Você ganhou')+' +'+n+' pts · Total: '+novo);
+  try{
+    await db.from('expdcoin_historico').insert({
+      user_id: state.user.id,
+      delta,
+      saldo_apos: novo,
+      motivo: motivo || (delta>0 ? 'Pontos ganhos' : 'Pontos gastos')
+    });
+  }catch(e){ console.warn('historico:', e); }
+  toast((motivo|| (delta>0?'Você ganhou':'Movimento'))+' '+(delta>0?'+':'')+delta+' pts · Total: '+novo);
 }
+
+/* ================= realtime ================= */
+function teardownRealtime(){
+  realtimeChannels.forEach(ch=>{ try{ db.removeChannel(ch); }catch(e){} });
+  realtimeChannels = [];
+  state.realtimeReady = false;
+}
+function setupRealtime(){
+  if(!db || state.realtimeReady) return;
+  teardownRealtime();
+  const onChange = async (table)=>{
+    if(table==='torneios') await loadTorneios();
+    else if(table==='times') await loadTimes();
+    else if(table==='notificacoes') await loadNotificacoes();
+    // re-render se estiver na view afetada
+    if(state.tab==='torneios' || state.tab==='jogadores' || state.tab==='ranking' || state.tab==='admin'){
+      render();
+    } else {
+      renderNav();
+      renderTicker();
+    }
+  };
+  const chT = db.channel('rt-torneios')
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'torneios' }, ()=> onChange('torneios'))
+    .subscribe();
+  const chTi = db.channel('rt-times')
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'times' }, ()=> onChange('times'))
+    .subscribe();
+  const chN = db.channel('rt-notif')
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'notificacoes' }, ()=> onChange('notificacoes'))
+    .subscribe();
+  realtimeChannels = [chT, chTi, chN];
+  state.realtimeReady = true;
+}
+
+/* ================= notificações ================= */
+async function loadNotificacoes(){
+  if(!state.user){ state.notificacoes = []; return; }
+  try{
+    const { data, error } = await db.from('notificacoes')
+      .select('*')
+      .eq('user_id', state.user.id)
+      .order('created_at', { ascending:false })
+      .limit(40);
+    if(error){ console.warn('notif', error); return; }
+    state.notificacoes = data||[];
+  }catch(e){ console.warn(e); }
+}
+async function criarNotificacao(userId, { tipo, titulo, corpo, link }){
+  if(!userId) return;
+  try{
+    await db.from('notificacoes').insert({
+      user_id: userId,
+      tipo: tipo||'info',
+      titulo: titulo||'Aviso',
+      corpo: corpo||'',
+      link: link||null
+    });
+  }catch(e){ console.warn('criarNotif', e); }
+}
+async function marcarNotifLida(id){
+  try{
+    await db.from('notificacoes').update({ lida: true }).eq('id', id);
+    const n = state.notificacoes.find(x=>x.id===id);
+    if(n) n.lida = true;
+  }catch(e){}
+}
+async function marcarTodasLidas(){
+  if(!state.user) return;
+  try{
+    await db.from('notificacoes').update({ lida: true }).eq('user_id', state.user.id).eq('lida', false);
+    state.notificacoes.forEach(n=> n.lida = true);
+  }catch(e){}
+}
+async function notificarInscritosTorneio(t, titulo, corpo){
+  const ids = [...new Set((t.times||[]).map(id=>{
+    const tm = state.times.find(x=>x.id===id);
+    return tm && tm.dono;
+  }).filter(Boolean))];
+  const link = '?torneio='+t.id;
+  for(const uid of ids){
+    await criarNotificacao(uid, { tipo:'torneio_inicio', titulo, corpo, link });
+  }
+}
+async function notificarSuaVez(t, match){
+  const link = '?torneio='+t.id;
+  for(const side of ['timeA','timeB']){
+    const tm = match[side];
+    if(!tm || !tm.dono) continue;
+    await criarNotificacao(tm.dono, {
+      tipo: 'sua_vez',
+      titulo: 'Sua vez de jogar',
+      corpo: `${tm.nome}: partida em ${t.nome}`,
+      link
+    });
+  }
+}
+
+/* ================= expd histórico + loja ================= */
+async function loadExpdHistorico(){
+  if(!state.user){ state.expdHistorico = []; return; }
+  try{
+    const { data, error } = await db.from('expdcoin_historico')
+      .select('*')
+      .eq('user_id', state.user.id)
+      .order('created_at', { ascending:false })
+      .limit(50);
+    if(error){ console.warn('hist', error); return; }
+    state.expdHistorico = data||[];
+  }catch(e){}
+}
+async function loadLoja(){
+  try{
+    const { data, error } = await db.from('loja_itens').select('*').eq('ativo', true).order('ordem', { ascending:true });
+    if(error){ console.warn('loja', error); state.lojaItens = []; return; }
+    state.lojaItens = data||[];
+  }catch(e){ state.lojaItens = []; }
+  if(state.user){
+    try{
+      const { data } = await db.from('loja_compras').select('*').eq('user_id', state.user.id).order('created_at', { ascending:false }).limit(30);
+      state.lojaCompras = data||[];
+    }catch(e){ state.lojaCompras = []; }
+  }
+}
+async function comprarItemLoja(item){
+  if(!state.user){ toast('Faça login'); return; }
+  const preco = Number(item.preco)||0;
+  const saldo = Number(state.user.pontos)||0;
+  if(saldo < preco){ toast('Saldo insuficiente'); return; }
+  if(!confirm(`Resgatar "${item.nome}" por ${preco} ExpdCoin?`)) return;
+  // gasta pontos
+  await addPontos(-preco, 'Loja: '+item.nome);
+  try{
+    await db.from('loja_compras').insert({ user_id: state.user.id, item_id: item.id, preco_pago: preco });
+    if(item.estoque != null){
+      await db.from('loja_itens').update({ estoque: Math.max(0, (item.estoque||0)-1) }).eq('id', item.id);
+    }
+  }catch(e){ console.warn(e); }
+  await criarNotificacao(state.user.id, {
+    tipo: 'loja',
+    titulo: 'Resgate na loja',
+    corpo: `Você resgatou: ${item.nome}`,
+    link: null
+  });
+  await loadLoja();
+  await loadExpdHistorico();
+  toast('Resgate registrado (fase de teste)');
+  render();
+}
+
+/* ================= storage avatar ================= */
+async function uploadAvatarFile(file){
+  if(!state.user) throw new Error('login');
+  const ext = (file.name.split('.').pop()||'jpg').toLowerCase().replace(/[^a-z0-9]/g,'') || 'jpg';
+  const path = `${state.user.id}/${Date.now()}.${ext}`;
+  // comprime via canvas se possível
+  let blob = file;
+  try{
+    const dataUrl = await resizeImageToDataURL(file, 320);
+    const res = await fetch(dataUrl);
+    blob = await res.blob();
+  }catch(e){}
+  const { error } = await db.storage.from('avatars').upload(path, blob, {
+    upsert: true,
+    contentType: blob.type || file.type || 'image/jpeg'
+  });
+  if(error) throw error;
+  const { data } = db.storage.from('avatars').getPublicUrl(path);
+  return data.publicUrl;
+}
+
 
 /* ================= data load ================= */
 async function loadTorneios(){
@@ -1551,7 +1812,8 @@ async function loadTorneios(){
     regras: t.regras||'',
     formato: t.formato||'mata_mata',
     config: t.config||{},
-    grupos: t.grupos||null
+    grupos: t.grupos||null,
+    invite_code: t.invite_code||null
   }));
 }
 async function loadTimes(){
@@ -1586,6 +1848,8 @@ async function loadTimes(){
 async function loadAll(){
   await refreshUser();
   await Promise.all([loadTorneios(), loadTimes()]);
+  await Promise.all([loadNotificacoes(), loadExpdHistorico(), loadLoja()]);
+  setupRealtime();
 }
 
 /* ================= writes (Supabase) ================= */
@@ -1611,7 +1875,8 @@ async function criarTorneio(payload){
     formato: payload.formato||'mata_mata',
     config: payload.config||{},
     grupos: payload.grupos||null,
-    partidas: payload.partidas||null
+    partidas: payload.partidas||null,
+    invite_code: Math.random().toString(36).slice(2,12)
   };
   const { data, error } = await db.from('torneios').insert(row).select().single();
   if(error){
@@ -1941,9 +2206,69 @@ function renderNav(){
 
   const sb = document.getElementById('sessionBox');
   if(state.user){
-    sb.innerHTML = `<span class="user-chip" style="cursor:pointer" title="Meu perfil">${avatarHTML(state.user)} <span>Olá, <b>${state.user.nome}</b> · <b style="color:var(--gold)">${state.user.pontos||0} pts</b></span></span><button class="btn btn-ghost" id="logoutBtn">Sair</button>`;
+    const unread = (state.notificacoes||[]).filter(n=>!n.lida).length;
+    const badge = unread ? `<span class="notif-badge">${unread>9?'9+':unread}</span>` : '';
+    sb.innerHTML = `
+      <div class="notif-wrap"><button type="button" class="notif-btn" id="notifBtn" title="Notificações">🔔${badge}</button>
+        <div class="notif-panel" id="notifPanel" hidden></div>
+      </div>
+      <span class="user-chip" style="cursor:pointer" title="Meu perfil">${avatarHTML(state.user)} <span>Olá, <b>${state.user.nome}</b> · <b style="color:var(--gold)">${state.user.pontos||0} pts</b></span></span>
+      <button class="btn btn-ghost" id="logoutBtn">Sair</button>`;
     sb.querySelector('.user-chip').onclick = ()=>{ state.tab='perfil'; state.perfilId=null; render(); };
-    document.getElementById('logoutBtn').onclick = async ()=>{ await db.auth.signOut(); state.user=null; state.tab='torneios'; render(); };
+    document.getElementById('logoutBtn').onclick = async ()=>{
+      teardownRealtime();
+      await db.auth.signOut();
+      state.user=null; state.notificacoes=[]; state.tab='torneios'; render();
+    };
+    const panel = document.getElementById('notifPanel');
+    const btn = document.getElementById('notifBtn');
+    const fillPanel = ()=>{
+      const list = state.notificacoes||[];
+      if(!list.length){
+        panel.innerHTML = '<div class="muted" style="padding:12px;font-size:13px;">Nenhuma notificação</div>';
+        return;
+      }
+      let htmlN = '<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 8px 10px;"><b style="font-size:13px;">Notificações</b><button type="button" class="link-btn" id="notifAllRead" style="font-size:12px;">Marcar todas</button></div>';
+      list.slice(0,20).forEach(n=>{
+        const when = n.created_at ? new Date(n.created_at).toLocaleString('pt-BR',{dateStyle:'short',timeStyle:'short'}) : '';
+        htmlN += `<div class="notif-item ${n.lida?'':'unread'}" data-id="${n.id}" data-link="${n.link||''}">
+          <div class="n-title">${n.titulo||'Aviso'}</div>
+          <div class="n-body">${n.corpo||''}</div>
+          <div class="n-time">${when}</div>
+        </div>`;
+      });
+      panel.innerHTML = htmlN;
+      const all = document.getElementById('notifAllRead');
+      if(all) all.onclick = async (e)=>{ e.stopPropagation(); await marcarTodasLidas(); fillPanel(); renderNav(); };
+      panel.querySelectorAll('.notif-item').forEach(el=>{
+        el.onclick = async ()=>{
+          await marcarNotifLida(el.dataset.id);
+          const link = el.dataset.link;
+          panel.hidden = true; state.notifOpen = false;
+          if(link){
+            try{
+              const u = new URL(link, window.location.origin);
+              const tid = u.searchParams.get('torneio');
+              if(tid){ state.tab='torneios'; state.torneioAtivo=tid; render(); return; }
+            }catch(e){}
+          }
+          renderNav();
+        };
+      });
+    };
+    btn.onclick = (e)=>{
+      e.stopPropagation();
+      state.notifOpen = !state.notifOpen;
+      panel.hidden = !state.notifOpen;
+      if(state.notifOpen) fillPanel();
+    };
+    if(!document._notifOutside){
+      document._notifOutside = true;
+      document.addEventListener('click', ()=>{ 
+        const p = document.getElementById('notifPanel');
+        if(p && !p.hidden){ p.hidden = true; state.notifOpen=false; }
+      });
+    }
   } else {
     sb.innerHTML = `<button class="btn btn-gold" id="loginBtn">Entrar</button>`;
     document.getElementById('loginBtn').onclick = ()=> openLoginModal('login');
@@ -2362,13 +2687,15 @@ function exportarCSV(t){
   URL.revokeObjectURL(url);
 }
 async function compartilhar(t){
-  const url = new URL(window.location.href);
+  const url = new URL(window.location.origin + window.location.pathname);
   url.searchParams.set('torneio', t.id);
+  url.searchParams.set('invite', '1');
+  if(t.invite_code) url.searchParams.set('code', t.invite_code);
   const link = url.toString();
   if(navigator.share){
-    try{ await navigator.share({title:t.nome, text:`Confira o campeonato ${t.nome} no e-Expedition!`, url:link}); return; }catch(e){ /* usuário cancelou */ return; }
+    try{ await navigator.share({title:t.nome, text:`Você foi convidado para ${t.nome} no e-Expedition! Inscreva-se:`, url:link}); return; }catch(e){ /* cancel */ return; }
   }
-  try{ await navigator.clipboard.writeText(link); toast('Link copiado!'); }
+  try{ await navigator.clipboard.writeText(link); toast('Link de convite copiado!'); }
   catch(e){ toast('Não foi possível copiar o link'); }
 }
 
@@ -2396,8 +2723,15 @@ function renderTorneioDetalhe(view){
       ${gameIconHTML(t.jogo, 'lg')}
     </div>
   `));
-  document.getElementById('backBtn').onclick=()=>{ state.torneioAtivo=null; state._editandoTorneio=false; render(); };
+  document.getElementById('backBtn').onclick=()=>{ state.torneioAtivo=null; state._editandoTorneio=false; state.fromInvite=false; render(); };
   document.getElementById('shareBtn').onclick=()=>compartilhar(t);
+
+  if(state.fromInvite && t.status==='aberto'){
+    view.appendChild(h(`<div class="invite-banner">
+      <b>Você foi convidado!</b>
+      <p class="muted" style="margin:6px 0 0;font-size:13.5px;">Inscreva-se abaixo com seu perfil para participar de <b>${t.nome}</b>.</p>
+    </div>`));
+  }
 
   if(t.config && t.config.campeao && t.config.campeao.nome){
     view.appendChild(h(`<div class="dev-banner soft" style="margin-bottom:16px;">
@@ -2494,6 +2828,11 @@ function renderTorneioDetalhe(view){
         const timesObjs = t.times.map(id=>state.times.find(x=>x.id===id)).filter(Boolean);
         iniciarTorneioComFormato(t, timesObjs);
         await saveTorneio(t);
+        try{
+          await notificarInscritosTorneio(t, 'Torneio começou!', `${t.nome} está em andamento. Confira chave e horários.`);
+          const pend = (t.partidas||[]).filter(m=>m.timeA&&m.timeB&&!m.vencedor);
+          if(pend[0]) await notificarSuaVez(t, pend[0]);
+        }catch(e){ console.warn(e); }
         toast('Torneio iniciado!');
         render();
       };
@@ -2851,8 +3190,8 @@ function renderExpdCoin(view){
 
   view.appendChild(h(`<div class="dev-banner soft">
     <div class="dev-badge test">Fase de teste</div>
-    <h3>Sistema de prêmios em desenvolvimento</h3>
-    <p class="muted" style="margin-bottom:0;">Os ExpdCoin já acumulam pontos (mini-games, futuras missões e eventos). <b>Recompensas, loja e resgates ainda estão em fase de teste e desenvolvimento</b> — valores e regras podem mudar a qualquer momento.</p>
+    <h3>Loja e histórico ativos em modo teste</h3>
+    <p class="muted" style="margin-bottom:0;">Pontos, histórico e resgates já funcionam. <b>Valores e itens podem mudar</b> a qualquer momento até sair da fase de teste.</p>
   </div>`));
 
   const hero = h(`<div class="expd-hero"></div>`);
@@ -2864,12 +3203,56 @@ function renderExpdCoin(view){
   </div>`));
   view.appendChild(hero);
 
-  view.appendChild(h(`<h3 style="margin:8px 0 12px;font-size:18px;">Como ganhar (em teste)</h3>`));
+  // Loja
+  view.appendChild(h(`<h3 style="margin:16px 0 12px;font-size:18px;">Loja ExpdCoin</h3>`));
+  const loja = state.lojaItens||[];
+  if(!loja.length){
+    view.appendChild(h(`<div class="muted" style="margin-bottom:16px;">Nenhum item na loja ainda. Rode a migração SQL no Supabase.</div>`));
+  } else {
+    const gridL = h(`<div class="loja-grid" style="margin-bottom:20px;"></div>`);
+    loja.forEach(item=>{
+      const card = h(`<div class="loja-card">
+        <div class="loja-emoji">${item.emoji||'🎁'}</div>
+        <h3 style="margin:0 0 6px;font-size:17px;">${item.nome}</h3>
+        <p class="muted" style="margin:0 0 10px;font-size:13px;">${item.descricao||''}</p>
+        <div class="loja-preco">${item.preco} EC</div>
+      </div>`);
+      const btn = h(`<button class="btn btn-gold" style="margin-top:12px;width:100%;">Resgatar</button>`);
+      btn.onclick = ()=> comprarItemLoja(item);
+      card.appendChild(btn);
+      gridL.appendChild(card);
+    });
+    view.appendChild(gridL);
+  }
+
+  // Histórico
+  view.appendChild(h(`<h3 style="margin:8px 0 12px;font-size:18px;">Histórico</h3>`));
+  const hist = state.expdHistorico||[];
+  const histBox = h(`<div class="card" style="max-width:920px;"><div class="card-body"></div></div>`);
+  const body = histBox.querySelector('.card-body');
+  if(!hist.length){
+    body.appendChild(h(`<p class="muted" style="margin:0;">Ainda sem movimentos. Jogue o mini-game ou resgate na loja.</p>`));
+  } else {
+    hist.forEach(row=>{
+      const d = Number(row.delta)||0;
+      const when = row.created_at ? new Date(row.created_at).toLocaleString('pt-BR',{dateStyle:'short',timeStyle:'short'}) : '';
+      body.appendChild(h(`<div class="hist-row">
+        <div>
+          <div style="font-weight:600;">${row.motivo||'Movimento'}</div>
+          <div class="muted" style="font-size:12px;">${when} · saldo ${row.saldo_apos}</div>
+        </div>
+        <div class="hist-delta ${d>=0?'pos':'neg'}">${d>=0?'+':''}${d}</div>
+      </div>`));
+    });
+  }
+  view.appendChild(histBox);
+
+  view.appendChild(h(`<h3 style="margin:20px 0 12px;font-size:18px;">Como ganhar</h3>`));
   const grid = h(`<div class="grid"></div>`);
   const items = [
-    ['Mini-game na home', 'Quando aparecer o desafio de reação, vença e ganhe pontos.', '+15'],
-    ['Campeonatos', 'Em breve: pontos por inscrição, vitórias e finais.', 'Em breve'],
-    ['Missões & eventos', 'Desafios sazonais e recompensas da comunidade.', 'Em breve'],
+    ['Mini-game na home', 'Desafio de reação — vença e ganhe pontos.', '+15'],
+    ['Campeonatos', 'Em breve: pontos por inscrição e vitórias.', 'Em breve'],
+    ['Missões & eventos', 'Desafios sazonais da comunidade.', 'Em breve'],
   ];
   items.forEach(([t,d,tag],i)=>{
     grid.appendChild(h(`<div class="card" style="animation-delay:${i*0.05}s;"><div class="card-body">
@@ -2879,11 +3262,6 @@ function renderExpdCoin(view){
     </div></div>`));
   });
   view.appendChild(grid);
-
-  view.appendChild(h(`<div class="card" style="margin-top:16px;max-width:920px;"><div class="card-body">
-    <h3 style="margin-top:0;font-size:17px;">Próximos passos</h3>
-    <p class="muted" style="margin:0;line-height:1.5;">Loja de recompensas, ranking de ExpdCoin e histórico de ganhos entram depois que o núcleo de pontos estiver estável. Obrigado por testar com a gente.</p>
-  </div></div>`));
 }
 
 function renderPerfil(view){
@@ -2951,7 +3329,7 @@ function renderPerfil(view){
 
   async function saveAvatar(value){
     const { error } = await db.auth.updateUser({ data: { avatar: value } });
-    if(error){ toast('Erro ao salvar foto (arquivo muito grande?)'); return false; }
+    if(error){ toast('Erro ao salvar foto'); return false; }
     await refreshUser();
     await syncMeuAvatarNosTimes();
     await loadTimes();
@@ -2966,9 +3344,20 @@ function renderPerfil(view){
       const file = fileInput.files[0];
       if(file.size > 2.5*1024*1024){ toast('Escolha uma imagem menor que 2,5 MB'); return; }
       try{
-        const dataUrl = await resizeImageToDataURL(file, 256);
-        await saveAvatar(dataUrl);
-      }catch(e){ console.error(e); toast('Não foi possível processar a imagem'); }
+        saveFotoBtn.disabled = true; saveFotoBtn.textContent = 'Enviando…';
+        const publicUrl = await uploadAvatarFile(file);
+        await saveAvatar(publicUrl);
+      }catch(e){
+        console.error(e);
+        // fallback base64 se storage falhar
+        try{
+          const dataUrl = await resizeImageToDataURL(file, 256);
+          await saveAvatar(dataUrl);
+          toast('Storage indisponível — salva em modo compatível');
+        }catch(e2){ toast('Não foi possível processar a imagem'); }
+      } finally {
+        saveFotoBtn.disabled = false; saveFotoBtn.textContent = 'Salvar foto';
+      }
       return;
     }
     const url = (urlInput.value||'').trim();
@@ -3702,6 +4091,11 @@ function renderAdminLista(view){
         const timesObjs = t.times.map(id=>state.times.find(x=>x.id===id)).filter(Boolean);
         iniciarTorneioComFormato(t, timesObjs);
         await saveTorneio(t);
+        try{
+          await notificarInscritosTorneio(t, 'Torneio começou!', `${t.nome} está em andamento. Confira chave e horários.`);
+          const pend = (t.partidas||[]).filter(m=>m.timeA&&m.timeB&&!m.vencedor);
+          if(pend[0]) await notificarSuaVez(t, pend[0]);
+        }catch(e){ console.warn(e); }
         toast('Torneio iniciado!');
         render();
       };
@@ -3837,7 +4231,21 @@ function bindHelp(){
     const torneioLink = params.get('torneio');
     if(torneioLink && state.torneios.find(x=>x.id===torneioLink)){
       state.torneioAtivo = torneioLink;
+      if(params.get('invite')==='1') state.fromInvite = true;
     }
+    // SEO dinâmico se abriu torneio
+    try{
+      if(state.torneioAtivo){
+        const tt = state.torneios.find(x=>x.id===state.torneioAtivo);
+        if(tt){
+          document.title = tt.nome + ' — e-Expedition';
+          const setMeta = (sel, attr, val)=>{ const el=document.querySelector(sel); if(el) el.setAttribute(attr,val); };
+          setMeta('meta[property="og:title"]','content', tt.nome + ' — e-Expedition');
+          setMeta('meta[property="og:description"]','content', (tt.jogo||'Campeonato')+' · Inscreva-se no e-Expedition');
+          setMeta('meta[name="twitter:title"]','content', tt.nome + ' — e-Expedition');
+        }
+      }
+    }catch(e){}
     applyAppearance(getAppearance());
     try{
       window.matchMedia('(prefers-color-scheme: light)').addEventListener('change', ()=>{
@@ -3847,6 +4255,30 @@ function bindHelp(){
     setupScrollEffects();
     bindAuthModal();
     bindHelp();
+    // PWA install prompt
+    window.addEventListener('beforeinstallprompt', (e)=>{
+      e.preventDefault();
+      state.deferredInstall = e;
+      if(!document.getElementById('pwaBanner')){
+        const b = h(`<div class="pwa-banner" id="pwaBanner">
+          <span style="font-size:13.5px;">Instalar o e-Expedition no celular</span>
+          <button class="btn btn-gold" id="pwaInstall" style="padding:7px 12px;font-size:12.5px;">Instalar</button>
+          <button class="btn btn-ghost" id="pwaDismiss" style="padding:7px 12px;font-size:12.5px;">Agora não</button>
+        </div>`);
+        document.body.appendChild(b);
+        document.getElementById('pwaInstall').onclick = async ()=>{
+          if(!state.deferredInstall) return;
+          state.deferredInstall.prompt();
+          try{ await state.deferredInstall.userChoice; }catch(e){}
+          state.deferredInstall = null;
+          b.remove();
+        };
+        document.getElementById('pwaDismiss').onclick = ()=> b.remove();
+      }
+    });
+    if('serviceWorker' in navigator){
+      navigator.serviceWorker.register('/sw.js').catch(()=>{});
+    }
     render();
     // popup de login ao entrar, se não estiver autenticado
     if(!state.user){
@@ -3855,7 +4287,6 @@ function bindHelp(){
     // suporte a recovery de senha (link do e-mail)
     const hash = window.location.hash || '';
     if(hash.includes('type=recovery') || hash.includes('type=signup')){
-      // usuário volta do e-mail — deixa logado e manda pro perfil se recovery
       if(hash.includes('type=recovery')){
         state.tab = 'perfil';
         render();
